@@ -19,6 +19,8 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 
+import { cronExpressionToParts } from '../../../../services';
+
 import { JobStatus } from '../../job_status';
 
 export class TabSummaryUi extends Component {
@@ -135,6 +137,9 @@ export class TabSummaryUi extends Component {
       dateHistogramTimeZone,
       dateHistogramField,
     } = job;
+
+    const cronParts = cronExpressionToParts(rollupCron);
+    console.log(cronParts)
 
     return (
       <Fragment>
