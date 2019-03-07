@@ -29,7 +29,7 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { management, SidebarNav, MANAGEMENT_BREADCRUMB, addViewSizeEventListener } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
@@ -141,6 +141,13 @@ uiModules
       },
 
       link: function ($scope) {
+        console.log('add listener')
+        addViewSizeEventListener('rollupJobListPage', isMaximized => {
+          console.log('isMaximized', isMaximized)
+          $scope.$apply(() => {
+            $scope.isMaximized = isMaximized;
+          });
+        });
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
         $scope.sections = management.items.inOrder;

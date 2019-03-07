@@ -8,22 +8,33 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import {
+  MANAGEMENT_BREADCRUMB,
+  addViewSizeEventListener,
+  removeViewSizeEventLister,
+  minimizePageSize,
+  maximizePageSize,
+  getPageSizeMaximized,
+} from 'ui/management';
 
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiContextMenu,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
@@ -37,6 +48,7 @@ import {
   DetailPanel,
 } from './detail_panel';
 
+const PAGE_ID = 'rollupJobListPage';
 const REFRESH_RATE_MS = 30000;
 
 export class JobListUi extends Component {
@@ -75,11 +87,15 @@ export class JobListUi extends Component {
 
     chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
 
-    this.state = {};
+    this.state = {
+      isPageOptionsOpen: false,
+      isPageMaximized: getPageSizeMaximized(PAGE_ID),
+    };
   }
 
   componentDidMount() {
     this.interval = setInterval(this.props.refreshJobs, REFRESH_RATE_MS);
+    addViewSizeEventListener(PAGE_ID, this.onPageSizeUpdate)
   }
 
   componentWillUnmount() {
@@ -88,7 +104,33 @@ export class JobListUi extends Component {
     // Close the panel, otherwise it will default to already being open when we navigate back to
     // this page.
     this.props.closeDetailPanel();
+
+    removeViewSizeEventListener(PAGE_ID, this.onPageSizeUpdate);
   }
+
+  onPageSizeUpdate = (isPageMaximized) => {
+    this.setState({ isPageMaximized });
+  }
+
+  closePageOptions = () => {
+    this.setState({ isPageOptionsOpen: false });
+  };
+
+  togglePageOptions = () => {
+    this.setState(prevState => ({
+      isPageOptionsOpen: !prevState.isPageOptionsOpen,
+    }));
+  };
+
+  togglePageMaximized = () => {
+    this.closePageOptions();
+
+    if (this.state.isPageMaximized) {
+      minimizePageSize(PAGE_ID);
+    } else {
+      maximizePageSize(PAGE_ID);
+    }
+  };
 
   getHeaderSection() {
     return (
@@ -227,6 +269,7 @@ export class JobListUi extends Component {
 
   renderList() {
     const { isLoading } = this.props;
+    const { isPageOptionsOpen, isPageMaximized } = this.state;
 
     return (
       <Fragment>
@@ -234,12 +277,50 @@ export class JobListUi extends Component {
           {this.getHeaderSection()}
 
           <EuiPageContentHeaderSection>
-            <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
-              <FormattedMessage
-                id="xpack.rollupJobs.jobList.createButtonLabel"
-                defaultMessage="Create rollup job"
-              />
-            </EuiButton>
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton fill {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.jobList.createButtonLabel"
+                    defaultMessage="Create rollup job"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id="pageOptionsMenu"
+                  button={(
+                    <EuiButtonIcon
+                      onClick={this.togglePageOptions}
+                      iconType="gear"
+                      aria-label="Page options"
+                    />
+                  )}
+                  isOpen={isPageOptionsOpen}
+                  closePopover={this.closePageOptions}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenu
+                    initialPanelId={0}
+                    panels={[{
+                      id: 0,
+                      items: [{
+                        name: (isPageMaximized ? 'Minimize page' : 'Maximize page'),
+                        icon: (
+                          <EuiIcon
+                            type="expand"
+                            size="m"
+                          />
+                        ),
+                        onClick: this.togglePageMaximized,
+                      }]
+                    }]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
 
