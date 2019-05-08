@@ -26,6 +26,7 @@ import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
+import { PolicyList } from './policy_list';
 import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
@@ -54,6 +55,16 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         />
       ),
       testSubj: 'srSnapshotsTab',
+    },
+    {
+      id: 'policies' as Section,
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.policiesTabTitle"
+          defaultMessage="Policies"
+        />
+      ),
+      testSubj: 'srPoliciesTab',
     },
     {
       id: 'repositories' as Section,
@@ -135,6 +146,11 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             exact
             path={`${BASE_PATH}/repositories/:repositoryName*`}
             component={RepositoryList}
+          />
+          <Route
+            exact
+            path={`${BASE_PATH}/policies/:policyName*`}
+            component={PolicyList}
           />
           {/* We have two separate SnapshotList routes because repository names could have slashes in
            *  them. This would break a route with a path like snapshots/:repositoryName?/:snapshotId*
