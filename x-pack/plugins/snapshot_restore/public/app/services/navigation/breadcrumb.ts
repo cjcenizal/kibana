@@ -12,6 +12,7 @@ class BreadcrumbService {
   private breadcrumbs: any = {
     management: {},
     home: {},
+    policyAdd: {},
     repositoryAdd: {},
     repositoryEdit: {},
   };
@@ -22,6 +23,10 @@ class BreadcrumbService {
     this.breadcrumbs.home = {
       text: textService.breadcrumbs.home,
       href: `#${BASE_PATH}`,
+    };
+    this.breadcrumbs.policyAdd = {
+      text: 'Create policy',
+      href: `#${BASE_PATH}/add_policy`,
     };
     this.breadcrumbs.repositoryAdd = {
       text: textService.breadcrumbs.repositoryAdd,

@@ -10,7 +10,7 @@ import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION } from './constants';
-import { RepositoryAdd, RepositoryEdit, SnapshotRestoreHome } from './sections';
+import { PolicyAdd, RepositoryAdd, RepositoryEdit, SnapshotRestoreHome } from './sections';
 import { loadPermissions } from './services/http';
 import { useAppDependencies } from './index';
 
@@ -91,6 +91,7 @@ export const App: React.FunctionComponent = () => {
     <div>
       <Switch>
         <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
+        <Route exact path={`${BASE_PATH}/add_policy`} component={PolicyAdd} />
         <Route exact path={`${BASE_PATH}/add_repository`} component={RepositoryAdd} />
         <Route exact path={`${BASE_PATH}/edit_repository/:name*`} component={RepositoryEdit} />
         <Route

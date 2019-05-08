@@ -10,3 +10,4 @@ export { RepositoryForm } from './repository_form';
 export { RepositoryVerificationBadge } from './repository_verification_badge';
 export { SectionError } from './section_error';
 export { SectionLoading } from './section_loading';
+export { CronEditor } from './cron_editor';
