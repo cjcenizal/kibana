@@ -96,7 +96,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               <h1>
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreTitle"
-                  defaultMessage="Snapshot Repositories"
+                  defaultMessage="Snapshot and Restore"
                 />
               </h1>
             </EuiFlexItem>
