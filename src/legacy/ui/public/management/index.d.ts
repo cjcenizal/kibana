@@ -28,8 +28,5 @@ declare module 'ui/management' {
     allowOverride: boolean
   ): void;
   export const management: any; // TODO - properly provide types
-  export const MANAGEMENT_BREADCRUMB: {
-    text: string;
-    href: string;
-  };
+  export const MANAGEMENT_BREADCRUMB: any;
 }
