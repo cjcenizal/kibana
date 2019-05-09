@@ -359,17 +359,10 @@ export class IndexTableUi extends Component {
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
     return (
-      <EuiPageContent>
+      <Fragment>
+        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexTable.sectionHeading"
-                  defaultMessage="Index Management"
-                />
-              </h1>
-            </EuiTitle>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
               <p>
@@ -486,7 +479,7 @@ export class IndexTableUi extends Component {
         )}
         <EuiSpacer size="m" />
         {indices.length > 0 ? this.renderPager() : null}
-      </EuiPageContent>
+      </Fragment>
     );
   }
 }
