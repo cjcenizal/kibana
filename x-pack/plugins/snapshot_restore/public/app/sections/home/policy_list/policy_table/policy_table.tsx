@@ -141,7 +141,7 @@ const PolicyTableUi: React.FunctionComponent<Props> = ({
         {selectedItems.length === 1 ? (
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryList.table.deleteSinglePolicyButton"
-            defaultMessage="Remove policies"
+            defaultMessage="Remove policy"
           />
         ) : (
           <FormattedMessage
