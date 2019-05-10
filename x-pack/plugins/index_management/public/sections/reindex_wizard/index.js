@@ -22,6 +22,12 @@ export class ReindexWizard extends Component {
     ]);
 
     this.options = [{
+      label: 'kibana_sample_data_flights',
+    }, {
+      label: 'kibana_sample_data_logs',
+    }, {
+      label: 'kibana_sample_data_ecommerce',
+    }, {
       label: 'web-logs-1',
     }, {
       label: 'web-logs-2',
@@ -34,7 +40,7 @@ export class ReindexWizard extends Component {
     }];
 
     this.state = {
-      selectedOptions: [],
+      selectedOptions: [this.options[0], this.options[1], this.options[2]],
       settings: `{
 
 }`,
