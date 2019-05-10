@@ -7,6 +7,8 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
+import chrome from 'ui/chrome';
+
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,11 +22,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { BASE_PATH, UIM_APP_LOAD } from '../common/constants';
+import { UIM_APP_LOAD } from '../common/constants';
+import { ReindexWizard } from './sections/reindex_wizard';
 import { IndexList } from './sections/index_list';
 import { IndexTemplateList } from './sections/index_template_list';
 import { ReindexingList } from './sections/reindexing_list';
 import { trackUiMetric } from './services';
+
+const BASE_PATH = '/management/elasticsearch/index_management';
 
 export const App = () => {
   useEffect(() => trackUiMetric(UIM_APP_LOAD), []);
@@ -36,8 +41,8 @@ export const App = () => {
   );
 };
 
-// Exoprt this so we can test it with a different router.
-export const AppWithoutRouter = () => {
+const Home = () => {
+
   const [selectedTab, selectTab] = useState('indices');
 
   const tabs = [
@@ -55,8 +60,34 @@ export const AppWithoutRouter = () => {
     },
   ];
 
+  switch (selectedTab) {
+    case 'indices':
+      chrome.breadcrumbs.set([
+        { text: 'Management', href: '#/management/elasticsearch' },
+        { text: 'Index management', href: '#/management/elasticsearch/index_management' },
+        { text: 'Indices' },
+      ]);
+      break;
+
+    case 'index_templates':
+      chrome.breadcrumbs.set([
+        { text: 'Management', href: '#/management/elasticsearch' },
+        { text: 'Index management', href: '#/management/elasticsearch/index_management' },
+        { text: 'Index templates' },
+      ]);
+      break;
+
+    case 'reindexing_list':
+      chrome.breadcrumbs.set([
+        { text: 'Management', href: '#/management/elasticsearch' },
+        { text: 'Index management', href: '#/management/elasticsearch/index_management' },
+        { text: 'Reindex tasks' },
+      ]);
+      break;
+  }
+
   return (
-    <EuiPageContent>
+    <Fragment>
       <EuiTitle size="m">
         <h1>
           Index Management
@@ -80,14 +111,27 @@ export const AppWithoutRouter = () => {
 
       {(selectedTab === 'indices') && (
         <Switch>
-          <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}indices`} />
-          <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
-          <Route path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
+          <Route exact path={`${BASE_PATH}/indices`} component={IndexList} />
+          <Route path={`${BASE_PATH}/indices/filter/:filter?`} component={IndexList} />
         </Switch>
       )}
 
       {(selectedTab === 'index_templates') && <IndexTemplateList />}
       {(selectedTab === 'reindexing_list') && <ReindexingList />}
+    </Fragment>
+  );
+};
+
+// Exoprt this so we can test it with a different router.
+export const AppWithoutRouter = () => {
+
+  return (
+    <EuiPageContent>
+      <Switch>
+        <Redirect exact from={`${BASE_PATH}/`} to={`${BASE_PATH}/indices`} />
+        <Route path={`${BASE_PATH}/indices`} component={Home} />
+        <Route exact path={`${BASE_PATH}/reindex`} component={ReindexWizard} />
+      </Switch>
     </EuiPageContent>
   );
 };

@@ -70,6 +70,7 @@ class IndexActionsContextMenuUi extends Component {
         id: 'xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel',
         defaultMessage: 'Reindex {selectedIndexCount, plural, one {index} other {indices} }',
       }, { selectedIndexCount }),
+      href: '#/management/elasticsearch/index_management/reindex'
     }];
     if (!detailPanel && selectedIndexCount === 1) {
       items.push({
