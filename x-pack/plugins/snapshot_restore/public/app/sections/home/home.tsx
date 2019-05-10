@@ -57,16 +57,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
       testSubj: 'srSnapshotsTab',
     },
     {
-      id: 'policies' as Section,
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.policiesTabTitle"
-          defaultMessage="Policies"
-        />
-      ),
-      testSubj: 'srPoliciesTab',
-    },
-    {
       id: 'repositories' as Section,
       name: (
         <FormattedMessage
@@ -75,6 +65,16 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         />
       ),
       testSubj: 'srRepositoriesTab',
+    },
+    {
+      id: 'policies' as Section,
+      name: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.home.policiesTabTitle"
+          defaultMessage="Policies"
+        />
+      ),
+      testSubj: 'srPoliciesTab',
     },
   ];
 

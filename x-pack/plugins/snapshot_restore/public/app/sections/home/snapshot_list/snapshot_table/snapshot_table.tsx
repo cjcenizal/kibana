@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiButton, EuiInMemoryTable, EuiLink, Query, EuiLoadingSpinner } from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
+import { EuiButton, EuiConfirmModal, EuiOverlayMask, EuiToolTip, EuiButtonIcon, EuiInMemoryTable, EuiLink, Query, EuiLoadingSpinner } from '@elastic/eui';
+import { withRouter } from "react-router";
 
 import { SnapshotDetails } from '../../../../../../common/types';
 import { SNAPSHOT_STATE } from '../../../../constants';
@@ -22,7 +23,10 @@ interface Props {
   repositoryFilter?: string;
 }
 
+let restoreName;
+
 export const SnapshotTable: React.FunctionComponent<Props> = ({
+  history,
   snapshots,
   repositories,
   reload,
@@ -34,6 +38,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       i18n: { FormattedMessage, translate },
     },
   } = useAppDependencies();
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [restoreId, setRestoreId] = useState<boolean>(undefined);
 
   const columns = [
     {
@@ -124,6 +131,28 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       width: '100px',
       render: (failedShards: number) => failedShards,
     },
+    {
+      name: 'Actions',
+      render: ({ uuid }) => {
+        if (restoreId === uuid) {
+          return  <EuiLoadingSpinner size="m" />;
+        }
+
+        const label = 'Restore snapshot'
+
+        return (
+          <EuiToolTip content={label} delay="long">
+            <EuiButtonIcon
+              aria-label="Restore snapshot"
+              iconType="editorUndo"
+              color="primary"
+              onClick={() => { setIsModalOpen(true); restoreName = uuid; }}
+            />
+          </EuiToolTip>
+        );
+      },
+      width: '100px',
+    },
   ];
 
   // By default, we'll display the most recent snapshots at the top of the table.
@@ -182,20 +211,51 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       : '',
   };
 
+  const renderModal = () => {
+    if (!isModalOpen) {
+      return null;
+    }
+
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Restore snapshot?"
+          onCancel={() => setIsModalOpen(false)}
+          onConfirm={() => { setRestoreId(restoreName); setIsModalOpen(false); }}
+          cancelButtonText="Cancel"
+          confirmButtonText="Restore all indices in snapshot"
+          buttonColor="primary"
+          data-test-subj="srDeleteRepositoryConfirmationModal"
+        >
+          <p>
+            This will restore all the indices in this snapshot but won't restore the global cluster state.
+          </p>
+
+          <p>
+            Use <EuiLink href="#">Advanced Snapshot Restore</EuiLink> if you want to select the indices to restore, restore the global cluster state, or customize the index settings.
+          </p>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  };
+
   return (
-    <EuiInMemoryTable
-      items={snapshots}
-      itemId="name"
-      columns={columns}
-      search={search}
-      sorting={sorting}
-      pagination={pagination}
-      rowProps={() => ({
-        'data-test-subj': 'srSnapshotListTableRow',
-      })}
-      cellProps={(item: any, column: any) => ({
-        'data-test-subj': `srSnapshotListTableCell-${column.field}`,
-      })}
-    />
+    <Fragment>
+      <EuiInMemoryTable
+        items={snapshots}
+        itemId="name"
+        columns={columns}
+        search={search}
+        sorting={sorting}
+        pagination={pagination}
+        rowProps={() => ({
+          'data-test-subj': 'srSnapshotListTableRow',
+        })}
+        cellProps={(item: any, column: any) => ({
+          'data-test-subj': `srSnapshotListTableCell-${column.field}`,
+        })}
+      />
+      {renderModal()}
+    </Fragment>
   );
 };

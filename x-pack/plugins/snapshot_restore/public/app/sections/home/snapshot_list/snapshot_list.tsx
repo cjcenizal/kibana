@@ -204,6 +204,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         <EuiSpacer />
 
         <SnapshotTable
+          history={history}
           snapshots={snapshots}
           repositories={repositories}
           reload={reload}
