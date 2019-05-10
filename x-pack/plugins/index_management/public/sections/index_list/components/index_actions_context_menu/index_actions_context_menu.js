@@ -65,7 +65,12 @@ class IndexActionsContextMenuUi extends Component {
     const allFrozen = all(indices, (index) => index.isFrozen);
     const allUnfrozen = all(indices, (index) => !index.isFrozen);
     const selectedIndexCount = indexNames.length;
-    const items = [];
+    const items = [{
+      name: intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel',
+        defaultMessage: 'Reindex {selectedIndexCount, plural, one {index} other {indices} }',
+      }, { selectedIndexCount }),
+    }];
     if (!detailPanel && selectedIndexCount === 1) {
       items.push({
         name: intl.formatMessage({
