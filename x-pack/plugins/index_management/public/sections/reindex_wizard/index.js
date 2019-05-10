@@ -238,7 +238,7 @@ export class ReindexWizard extends Component {
               <EuiButton
                 color="secondary"
                 iconType="check"
-                onClick={() => {}}
+                href="#/management/elasticsearch/index_management/reindex_tasks"
                 fill
                 data-test-subj="submitButton"
               >

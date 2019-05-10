@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 import chrome from 'ui/chrome';
@@ -41,9 +41,9 @@ export const App = () => {
   );
 };
 
-const Home = () => {
-
-  const [selectedTab, selectTab] = useState('indices');
+const Home = ({ match, history }) => {
+  const urlParts = match.url.split('/');
+  const selectedTab = urlParts[urlParts.length - 1];
 
   const tabs = [
     {
@@ -55,7 +55,7 @@ const Home = () => {
       name: 'Index templates',
     },
     {
-      id: 'reindexing_list',
+      id: 'reindex_tasks',
       name: 'Reindex tasks',
     },
   ];
@@ -99,7 +99,7 @@ const Home = () => {
       <EuiTabs>
         {tabs.map(tab => (
           <EuiTab
-            onClick={() => selectTab(tab.id)}
+            onClick={() => history.push(`/management/elasticsearch/index_management/${tab.id}`)}
             isSelected={tab.id === selectedTab}
             key={tab.id}
             data-test-subject={tab.testSubj}
@@ -117,7 +117,7 @@ const Home = () => {
       )}
 
       {(selectedTab === 'index_templates') && <IndexTemplateList />}
-      {(selectedTab === 'reindexing_list') && <ReindexingList />}
+      {(selectedTab === 'reindex_tasks') && <ReindexingList />}
     </Fragment>
   );
 };
@@ -129,8 +129,8 @@ export const AppWithoutRouter = () => {
     <EuiPageContent>
       <Switch>
         <Redirect exact from={`${BASE_PATH}/`} to={`${BASE_PATH}/indices`} />
-        <Route path={`${BASE_PATH}/indices`} component={Home} />
         <Route exact path={`${BASE_PATH}/reindex`} component={ReindexWizard} />
+        <Route path={`${BASE_PATH}/:tab`} component={Home} />
       </Switch>
     </EuiPageContent>
   );
