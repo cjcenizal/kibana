@@ -24,6 +24,7 @@ import {
 
 import { UIM_APP_LOAD } from '../common/constants';
 import { ReindexWizard } from './sections/reindex_wizard';
+import { IndexTemplateForm } from './sections/index_template_form';
 import { IndexList } from './sections/index_list';
 import { IndexTemplateList } from './sections/index_template_list';
 import { ReindexingList } from './sections/reindexing_list';
@@ -130,6 +131,7 @@ export const AppWithoutRouter = () => {
       <Switch>
         <Redirect exact from={`${BASE_PATH}/`} to={`${BASE_PATH}/indices`} />
         <Route exact path={`${BASE_PATH}/reindex`} component={ReindexWizard} />
+        <Route exact path={`${BASE_PATH}/create_index_template`} component={IndexTemplateForm} />
         <Route path={`${BASE_PATH}/:tab`} component={Home} />
       </Switch>
     </EuiPageContent>

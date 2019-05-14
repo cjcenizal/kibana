@@ -161,7 +161,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({ histor
             <EuiButton
               color="secondary"
               iconType="check"
-              onClick={() => {}}
+              href="#/management/elasticsearch/snapshot_restore/policies"
               fill
               data-test-subj="submitButton"
             >

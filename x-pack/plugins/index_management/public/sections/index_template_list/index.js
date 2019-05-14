@@ -183,7 +183,7 @@ export const IndexTemplateList = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
-            href="#"
+            href="#/management/elasticsearch/index_management/create_index_template"
             fill
             iconType="plusInCircle"
             data-test-subj="srRepositoriesAddButton"

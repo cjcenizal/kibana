@@ -11,55 +11,35 @@ import { Route } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { EuiPageBody, EuiComboBox, EuiCodeEditor, EuiPageContent, EuiText, EuiLink, EuiButtonEmpty, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiFieldText, EuiForm, EuiDescribedFormGroup, EuiSelect, EuiFormRow } from '@elastic/eui';
 
-export class ReindexWizard extends Component {
+export class IndexTemplateForm extends Component {
   constructor(...rest) {
     super(...rest);
 
     chrome.breadcrumbs.set([
       { text: 'Management', href: '#/management/elasticsearch' },
       { text: 'Index management', href: '#/management/elasticsearch/index_management' },
-      { text: 'Reindex indices' },
+      { text: 'Create index template' },
     ]);
 
-    this.selectOptions = [
-      { value: 'internal', text: 'Internal' },
-      { value: 'external', text: 'External' },
-    ];
-
-    this.options = [{
-      label: 'kibana_sample_data_flights',
-    }, {
-      label: 'kibana_sample_data_logs',
-    }, {
-      label: 'kibana_sample_data_ecommerce',
-    }, {
-      label: 'web-logs-1',
-    }, {
-      label: 'web-logs-2',
-    }, {
-      label: 'web-logs-3',
-    }, {
-      label: 'client-access',
-    }, {
-      label: 'sales-metrics-2019',
-    }];
+    this.options = [];
 
     this.state = {
-      value: this.selectOptions[0].value,
-      selectedOptions: [this.options[0], this.options[1], this.options[2]],
-      settings: '',
+      selectedOptions: [],
+      settings: `{
+
+}`,
+      mappings: `{
+
+}`,
+      aliases: `{
+
+}`,
     };
   }
 
   onChange = (selectedOptions) => {
     this.setState({
       selectedOptions,
-    });
-  };
-
-  onSelectChange = e => {
-    this.setState({
-      value: e.target.value,
     });
   };
 
@@ -105,20 +85,20 @@ export class ReindexWizard extends Component {
               title={(
                 <EuiTitle size="s">
                   <h2>
-                    Logistics
+                    Index patterns
                   </h2>
                 </EuiTitle>
               )}
-              description='Which data do you want to reindex, and where should we create the new data?'
+              description='Define which indices this template should apply to.'
               fullWidth
             >
               <EuiFormRow
-                label="Source indices"
+                label="Index templates"
                 fullWidth
               >
                 <EuiComboBox
                   fullWidth
-                  placeholder="Select indices or define index patterns"
+                  placeholder="Define index patterns"
                   options={this.options}
                   selectedOptions={selectedOptions}
                   onChange={this.onChange}
@@ -127,28 +107,19 @@ export class ReindexWizard extends Component {
                   data-test-subj="demoComboBox"
                 />
               </EuiFormRow>
-
-              <EuiFormRow
-                label="Destination index"
-                fullWidth
-              >
-                <EuiFieldText
-                  fullWidth
-                />
-              </EuiFormRow>
             </EuiDescribedFormGroup>
 
             <EuiDescribedFormGroup
               title={(
                 <EuiTitle size="s">
                   <h2>
-                    Painless script
+                    Settings
                   </h2>
                 </EuiTitle>
               )}
               description={(
                 <p>
-                  Modify the metadata of each document. <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html" target="_blank">Learn more.</EuiLink>
+                  Define how your indices behave. <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules.html" target="_blank">Learn more.</EuiLink>
                 </p>
               )}
               fullWidth
@@ -176,13 +147,13 @@ export class ReindexWizard extends Component {
               title={(
                 <EuiTitle size="s">
                   <h2>
-                    Version type
+                    Mappings
                   </h2>
                 </EuiTitle>
               )}
               description={(
                 <p>
-                  How would you like to resolve version conflicts? <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html" target="_blank">Learn more.</EuiLink>
+                  Define how documents and their fields are stored and indexed. <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html" target="_blank">Learn more.</EuiLink>
                 </p>
               )}
               fullWidth
@@ -191,10 +162,51 @@ export class ReindexWizard extends Component {
                 label="Name"
                 fullWidth
               >
-                <EuiSelect
-                  options={this.selectOptions}
-                  value={this.state.value}
-                  onChange={this.onSelectChange}
+                <EuiCodeEditor
+                  fullWidth
+                  mode="json"
+                  width="100%"
+                  theme="github"
+                  value={mappings}
+                  onChange={(json) => {
+                    this.setState({
+                      mappings: json,
+                    })
+                  }}
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+
+            <EuiDescribedFormGroup
+              title={(
+                <EuiTitle size="s">
+                  <h2>
+                    Aliases
+                  </h2>
+                </EuiTitle>
+              )}
+              description={(
+                <p>
+                  Use aliases to refer to the destination index by different names when making requests against Elasticsearch's APIs. <EuiLink href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-aliases.html" target="_blank">Learn more.</EuiLink>
+                </p>
+              )}
+              fullWidth
+            >
+              <EuiFormRow
+                label="Name"
+                fullWidth
+              >
+                <EuiCodeEditor
+                  fullWidth
+                  mode="json"
+                  width="100%"
+                  theme="github"
+                  value={aliases}
+                  onChange={(json) => {
+                    this.setState({
+                      aliases: json,
+                    })
+                  }}
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>
@@ -207,11 +219,11 @@ export class ReindexWizard extends Component {
               <EuiButton
                 color="secondary"
                 iconType="check"
-                href="#/management/elasticsearch/index_management/reindex_tasks"
+                href="#/management/elasticsearch/index_management/index_templates"
                 fill
                 data-test-subj="submitButton"
               >
-                Start reindexing
+                Create index template
               </EuiButton>
             </EuiFlexItem>
 
