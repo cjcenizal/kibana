@@ -71,11 +71,10 @@ export class IndexTemplateForm extends Component {
     const { selectedOptions, settings, mappings, aliases } = this.state;
 
     return (
-      <EuiPageBody>
-        <EuiPageContent>
+        <Fragment>
           <EuiTitle size="l">
             <h1>
-              Reindex indices
+              Create index template
             </h1>
           </EuiTitle>
           <EuiSpacer size="l" />
@@ -237,8 +236,7 @@ export class IndexTemplateForm extends Component {
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageContent>
-      </EuiPageBody>
+        </Fragment>
     );
   }
 }

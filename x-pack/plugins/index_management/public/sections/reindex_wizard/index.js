@@ -91,8 +91,7 @@ export class ReindexWizard extends Component {
     const { selectedOptions, settings, mappings, aliases } = this.state;
 
     return (
-      <EuiPageBody>
-        <EuiPageContent>
+        <Fragment>
           <EuiTitle size="l">
             <h1>
               Reindex indices
@@ -225,8 +224,7 @@ export class ReindexWizard extends Component {
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageContent>
-      </EuiPageBody>
+        </Fragment>
     );
   }
 }
