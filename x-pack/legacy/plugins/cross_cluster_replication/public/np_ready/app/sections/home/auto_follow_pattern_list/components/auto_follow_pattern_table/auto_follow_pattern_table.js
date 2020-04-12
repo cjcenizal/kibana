@@ -191,7 +191,7 @@ export class AutoFollowPatternTable extends PureComponent {
                   );
 
               return (
-                <span
+                <button
                   onClick={event => {
                     if (event.stopPropagation) {
                       event.stopPropagation();
@@ -210,7 +210,7 @@ export class AutoFollowPatternTable extends PureComponent {
                     className="euiContextMenu__icon"
                   />
                   <span>{label}</span>
-                </span>
+                </button>
               );
             },
           },
@@ -224,13 +224,13 @@ export class AutoFollowPatternTable extends PureComponent {
               );
 
               return (
-                <span
+                <button
                   onClick={() => (window.location.hash = routing.getAutoFollowPatternPath(name))}
                   data-test-subj="contextMenuEditButton"
                 >
                   <EuiIcon aria-label={label} type="pencil" className="euiContextMenu__icon" />
                   <span>{label}</span>
-                </span>
+                </button>
               );
             },
           },
@@ -246,13 +246,13 @@ export class AutoFollowPatternTable extends PureComponent {
               return (
                 <AutoFollowPatternDeleteProvider>
                   {deleteAutoFollowPattern => (
-                    <span
+                    <button
                       onClick={() => deleteAutoFollowPattern(name)}
                       data-test-subj="contextMenuDeleteButton"
                     >
                       <EuiIcon aria-label={label} type="trash" className="euiContextMenu__icon" />
                       <span>{label}</span>
-                    </span>
+                    </button>
                   )}
                 </AutoFollowPatternDeleteProvider>
               );

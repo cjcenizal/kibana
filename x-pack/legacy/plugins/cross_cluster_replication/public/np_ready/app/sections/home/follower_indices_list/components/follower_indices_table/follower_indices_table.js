@@ -93,22 +93,22 @@ export class FollowerIndicesTable extends PureComponent {
           return isPaused ? (
             <FollowerIndexResumeProvider>
               {resumeFollowerIndex => (
-                <span onClick={() => resumeFollowerIndex(name)} data-test-subj="resumeButton">
+                <button onClick={() => resumeFollowerIndex(name)} data-test-subj="resumeButton">
                   <EuiIcon aria-label={label} type="play" className="euiContextMenu__icon" />
                   <span>{label}</span>
-                </span>
+                </button>
               )}
             </FollowerIndexResumeProvider>
           ) : (
             <FollowerIndexPauseProvider>
               {pauseFollowerIndex => (
-                <span
+                <button
                   onClick={() => pauseFollowerIndex(followerIndex)}
                   data-test-subj="pauseButton"
                 >
                   <EuiIcon aria-label={label} type="pause" className="euiContextMenu__icon" />
                   <span>{label}</span>
-                </span>
+                </button>
               )}
             </FollowerIndexPauseProvider>
           );
@@ -125,10 +125,10 @@ export class FollowerIndicesTable extends PureComponent {
           );
 
           return (
-            <span onClick={() => this.editFollowerIndex(name)} data-test-subj="editButton">
+            <button onClick={() => this.editFollowerIndex(name)} data-test-subj="editButton">
               <EuiIcon aria-label={label} type="pencil" className="euiContextMenu__icon" />
               <span>{label}</span>
-            </span>
+            </button>
           );
         },
       },
@@ -145,10 +145,10 @@ export class FollowerIndicesTable extends PureComponent {
           return (
             <FollowerIndexUnfollowProvider>
               {unfollowLeaderIndex => (
-                <span onClick={() => unfollowLeaderIndex(name)} data-test-subj="unfollowButton">
+                <button onClick={() => unfollowLeaderIndex(name)} data-test-subj="unfollowButton">
                   <EuiIcon aria-label={label} type="indexFlush" className="euiContextMenu__icon" />
                   <span>{label}</span>
-                </span>
+                </button>
               )}
             </FollowerIndexUnfollowProvider>
           );
