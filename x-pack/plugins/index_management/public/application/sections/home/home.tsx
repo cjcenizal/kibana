@@ -20,8 +20,10 @@ import {
 } from '@elastic/eui';
 import { BASE_PATH } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
+import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
+import { ComponentTemplateList } from './component_template_list';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
 type Section = 'indices' | 'templates';
@@ -38,6 +40,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const tabs = [
     {
+      id: 'data-streams' as Section,
+      name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Data Streams" />,
+    },
+    {
       id: 'indices' as Section,
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
     },
@@ -47,6 +53,15 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <FormattedMessage
           id="xpack.idxMgmt.home.indexTemplatesTabTitle"
           defaultMessage="Index Templates"
+        />
+      ),
+    },
+    {
+      id: 'component-templates' as Section,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.indexTemplatesTabTitle"
+          defaultMessage="Component Templates"
         />
       ),
     },
@@ -69,7 +84,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.idxMgmt.home.appTitle"
-                  defaultMessage="Index Management"
+                  defaultMessage="Data Management"
                 />
               </h1>
             </EuiFlexItem>
@@ -82,7 +97,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
               >
                 <FormattedMessage
                   id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
-                  defaultMessage="Index Management docs"
+                  defaultMessage="Data Management docs"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -107,9 +122,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
+          <Route exact path={`${BASE_PATH}data-streams`} component={DataStreamList} />
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
           <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
           <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
+          <Route exact path={`${BASE_PATH}component-templates`} component={ComponentTemplateList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

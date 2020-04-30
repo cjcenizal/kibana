@@ -47,23 +47,17 @@ const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
     defaultMessage: 'Name',
   }),
-  health: i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
-    defaultMessage: 'Health',
-  }),
-  status: i18n.translate('xpack.idxMgmt.indexTable.headers.statusHeader', {
-    defaultMessage: 'Status',
-  }),
-  primary: i18n.translate('xpack.idxMgmt.indexTable.headers.primaryHeader', {
-    defaultMessage: 'Primaries',
-  }),
-  replica: i18n.translate('xpack.idxMgmt.indexTable.headers.replicaHeader', {
-    defaultMessage: 'Replicas',
+  indices: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
+    defaultMessage: 'Indices count',
   }),
   documents: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
     defaultMessage: 'Docs count',
   }),
   size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
     defaultMessage: 'Storage size',
+  }),
+  policy: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
+    defaultMessage: 'ILM policy',
   }),
 };
 
@@ -215,9 +209,7 @@ export class IndexTable extends Component {
 
   buildRowCell(fieldName, value, index, appServices) {
     const { openDetailPanel, filterChanged } = this.props;
-    if (fieldName === 'health') {
-      return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
-    } else if (fieldName === 'name') {
+    if (fieldName === 'name') {
       return (
         <Fragment>
           <EuiLink
@@ -229,7 +221,17 @@ export class IndexTable extends Component {
           >
             {value}
           </EuiLink>
-          {renderBadges(index, filterChanged, appServices.extensionsService)}
+        </Fragment>
+      );
+    } else if (fieldName === 'policy') {
+      return (
+        <Fragment>
+          <EuiLink
+            data-test-subj="indexTableIndexNameLink"
+            href=""
+          >
+            {value}
+          </EuiLink>
         </Fragment>
       );
     }
@@ -446,32 +448,10 @@ export class IndexTable extends Component {
                     <EuiText color="subdued">
                       <FormattedMessage
                         id="xpack.idxMgmt.home.idxMgmtDescription"
-                        defaultMessage="Update your Elasticsearch indices individually or in bulk."
+                        defaultMessage="Update your Elasticsearch data streams individually or in bulk."
                       />
                     </EuiText>
                   </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
-                    <EuiFlexGroup>
-                      {extensionsService.toggles.map(toggle => {
-                        return this.renderToggleControl(toggle);
-                      })}
-                      <EuiFlexItem grow={false}>
-                        <EuiSwitch
-                          id="checkboxShowSystemIndices"
-                          checked={showSystemIndices}
-                          onChange={event => showSystemIndicesChanged(event.target.checked)}
-                          label={
-                            <FormattedMessage
-                              id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                              defaultMessage="Include system indices"
-                            />
-                          }
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="l" />
@@ -497,11 +477,6 @@ export class IndexTable extends Component {
                   <Fragment>
                     <EuiFlexItem>
                       <EuiSearchBar
-                        filters={
-                          this.getFilters(extensionsService).length > 0
-                            ? this.getFilters(extensionsService)
-                            : null
-                        }
                         defaultQuery={filter}
                         query={filter}
                         box={{
