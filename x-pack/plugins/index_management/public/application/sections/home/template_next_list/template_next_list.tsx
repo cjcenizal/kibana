@@ -15,7 +15,6 @@ import {
   EuiSwitch,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
@@ -36,7 +35,7 @@ interface MatchParams {
   templateName?: string;
 }
 
-export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TemplateNextList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { templateName },
   },
@@ -44,7 +43,110 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const { uiMetricService } = useServices();
-  const { error, isLoading, data: templates, sendRequest: reload } = useLoadIndexTemplates();
+  // const { error, isLoading, data: templates, sendRequest: reload } = useLoadIndexTemplates();
+  const error = null;
+  const isLoading = false;
+  const reload = () => {};
+  const templates = [{
+    "name": "triggered_watches",
+    "version": 11,
+    "order": 2147483647,
+    "indexPatterns": [
+      ".triggered_watches*"
+    ],
+    "isManaged": false,
+    "_kbnMeta": {
+      "formatVersion": 2
+    },
+    "hasSettings": true,
+    "hasAliases": false,
+    "hasMappings": true,
+    "components": 0
+  },
+  {
+    "name": "ilm-history",
+    "version": 2,
+    "order": 2147483647,
+    "indexPatterns": [
+      "ilm-history-2*"
+    ],
+    "ilmPolicy": {
+      "name": "ilm-history-ilm-policy",
+      "rollover_alias": "ilm-history-2"
+    },
+    "isManaged": false,
+    "_kbnMeta": {
+      "formatVersion": 2
+    },
+    "hasSettings": false,
+    "hasAliases": false,
+    "hasMappings": false,
+    "components": 4,
+  },
+  {
+    "name": "monitoring-es",
+    "version": 7000099,
+    "order": 0,
+    "indexPatterns": [
+      ".monitoring-es-7-*"
+    ],
+    "isManaged": false,
+    "_kbnMeta": {
+      "formatVersion": 2
+    },
+    "hasSettings": false,
+    "hasAliases": false,
+    "hasMappings": false,
+    "components": 3,
+  },
+  {
+    "name": "watches",
+    "version": 11,
+    "order": 2147483647,
+    "indexPatterns": [
+      ".watches*"
+    ],
+    "isManaged": false,
+    "_kbnMeta": {
+      "formatVersion": 1
+    },
+    "hasSettings": true,
+    "hasAliases": false,
+    "hasMappings": true,
+    "components": 0
+  },
+  {
+    "name": "ml-meta",
+    "version": 8000099,
+    "order": 0,
+    "indexPatterns": [
+      ".ml-meta"
+    ],
+    "isManaged": false,
+    "_kbnMeta": {
+      "formatVersion": 1
+    },
+    "hasSettings": true,
+    "hasAliases": false,
+    "hasMappings": true,
+    "components": 0
+  },
+  {
+    "name": ".ml-config",
+    "version": 8000099,
+    "order": 0,
+    "indexPatterns": [
+      ".ml-config"
+    ],
+    "isManaged": false,
+    "_kbnMeta": {
+      "formatVersion": 1
+    },
+    "hasSettings": true,
+    "hasAliases": false,
+    "hasMappings": true,
+    "components": 0
+  }];
   const queryParamsFormatVersion = getFormatVersionFromQueryparams(location);
 
   let content;
@@ -119,7 +221,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               <EuiText color="subdued">
                 <FormattedMessage
                   id="xpack.idxMgmt.home.indexTemplatesDescription"
-                  defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
+                  defaultMessage="Build index templates out of composable component templates."
                 />
               </EuiText>
             </EuiTitle>
@@ -152,16 +254,6 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   return (
     <div data-test-subj="templateList">
-      <EuiCallOut
-        title="These index templates will be deprecated in 8.0"
-        iconType="iInCircle"
-      >
-        <p>
-          Take a look at index templates (v2) to see a new, improved method of defining index
-          templates. This will become standard in 8.0.
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
       {content}
       {templateName && queryParamsFormatVersion !== undefined && (
         <TemplateDetails

@@ -31,7 +31,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={`${BASE_PATH}create_template`} component={TemplateCreate} />
     <Route exact path={`${BASE_PATH}clone_template/:name*`} component={TemplateClone} />
     <Route exact path={`${BASE_PATH}edit_template/:name*`} component={TemplateEdit} />
-    <Route path={`${BASE_PATH}:section(data-streams|indices|templates|component-templates)`} component={IndexManagementHome} />
+    <Route path={`${BASE_PATH}:section(data-streams|indices|templates|templates-next|component-templates)`} component={IndexManagementHome} />
     <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}indices`} />
   </Switch>
 );

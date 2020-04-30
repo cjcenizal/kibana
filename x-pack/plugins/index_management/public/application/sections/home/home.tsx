@@ -23,6 +23,7 @@ import { documentationService } from '../../services/documentation';
 import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
+import { TemplateNextList } from './template_next_list';
 import { ComponentTemplateList } from './component_template_list';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
@@ -53,6 +54,15 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <FormattedMessage
           id="xpack.idxMgmt.home.indexTemplatesTabTitle"
           defaultMessage="Index Templates"
+        />
+      ),
+    },
+    {
+      id: 'templates-next' as Section,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.indexTemplatesTabTitle"
+          defaultMessage="Index Templates (v2)"
         />
       ),
     },
@@ -106,7 +116,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
         <EuiSpacer size="m" />
 
-        <EuiTabs>
+        <EuiTabs display="condensed">
           {tabs.map(tab => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
@@ -126,6 +136,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
           <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
           <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
+          <Route exact path={`${BASE_PATH}templates-next/:templateName*`} component={TemplateNextList} />
           <Route exact path={`${BASE_PATH}component-templates`} component={ComponentTemplateList} />
         </Switch>
       </EuiPageContent>

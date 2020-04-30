@@ -145,7 +145,7 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
               <EuiText color="subdued">
                 <FormattedMessage
                   id="xpack.idxMgmt.home.indexTemplatesDescription"
-                  defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
+                  defaultMessage="Define component templates that apply settings, mappings, and aliases through multiple index templates (v2)."
                 />
               </EuiText>
             </EuiTitle>
