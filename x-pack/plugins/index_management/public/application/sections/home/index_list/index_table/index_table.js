@@ -47,6 +47,7 @@ const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
     defaultMessage: 'Name',
   }),
+  data_stream: 'Data stream',
   health: i18n.translate('xpack.idxMgmt.indexTable.headers.healthHeader', {
     defaultMessage: 'Health',
   }),
@@ -217,6 +218,16 @@ export class IndexTable extends Component {
     const { openDetailPanel, filterChanged } = this.props;
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
+    } else if (fieldName === 'data_stream') {
+      return (
+        <Fragment>
+          <EuiLink
+            onClick={() => {}}
+          >
+            {value}
+          </EuiLink>
+        </Fragment>
+      );
     } else if (fieldName === 'name') {
       return (
         <Fragment>
