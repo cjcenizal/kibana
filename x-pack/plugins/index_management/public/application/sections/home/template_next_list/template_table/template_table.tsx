@@ -257,7 +257,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         />
       </EuiButton>,
       <EuiButton
-        href={`#${BASE_PATH}create_template`}
+        href={`#${BASE_PATH}create_template_v2`}
         fill
         iconType="plusInCircle"
         data-test-subj="createTemplateButton"

@@ -9,6 +9,7 @@ import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { BASE_PATH, UIM_APP_LOAD } from '../../common/constants';
 import { IndexManagementHome } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
+import { TemplateCreateV2 } from './sections/template_create_v2';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
 
@@ -29,6 +30,7 @@ export const App = () => {
 export const AppWithoutRouter = () => (
   <Switch>
     <Route exact path={`${BASE_PATH}create_template`} component={TemplateCreate} />
+    <Route exact path={`${BASE_PATH}create_template_v2`} component={TemplateCreateV2} />
     <Route exact path={`${BASE_PATH}clone_template/:name*`} component={TemplateClone} />
     <Route exact path={`${BASE_PATH}edit_template/:name*`} component={TemplateEdit} />
     <Route path={`${BASE_PATH}:section(data-streams|indices|templates|templates-next|component-templates)`} component={IndexManagementHome} />

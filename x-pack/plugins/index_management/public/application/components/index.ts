@@ -10,4 +10,5 @@ export { NoMatch } from './no_match';
 export { PageErrorForbidden } from './page_error';
 export { TemplateDeleteModal } from './template_delete_modal';
 export { TemplateForm } from './template_form';
+export { TemplateFormV2 } from './template_form_v2';
 export * from './mappings_editor';

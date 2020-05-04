@@ -51,6 +51,15 @@ class BreadcrumbService {
       },
     ];
 
+    this.breadcrumbs.templateCreateV2 = [
+      ...this.breadcrumbs.templates,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.createTemplateLabel', {
+          defaultMessage: 'Create template (v2)',
+        }),
+      },
+    ];
+
     this.breadcrumbs.templateEdit = [
       ...this.breadcrumbs.templates,
       {
