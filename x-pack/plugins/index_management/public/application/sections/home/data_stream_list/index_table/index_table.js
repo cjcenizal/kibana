@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiHealth,
@@ -85,8 +86,51 @@ export class IndexTable extends Component {
 
     this.state = {
       selectedIndicesMap: {},
+      isManagedDataStreamsVisible: false,
     };
   }
+
+  getIndices() {
+    let indices = [{
+      name: 'production.logs',
+      indices: 3478,
+      documents: 65968,
+      size: '65651.4mb',
+      policy: 'ilm-policy-compliance',
+    }, {
+      name: 'staging1.logs',
+      indices: 128,
+      documents: 5703,
+      size: '3573.1mb',
+      policy: 'ilm-policy-3-days',
+    }, {
+      name: 'staging2.logs',
+      indices: 201,
+      documents: 13299,
+      size: '9153.2mb',
+      policy: 'ilm-policy-3-days',
+    }];
+
+
+    if (this.state.isManagedDataStreamsVisible) {
+      indices = indices.concat([{
+        name: 'nginx.access',
+        indices: 478,
+        documents: 1961,
+        size: '197.4mb',
+        package: 'System',
+      }, {
+        name: 'logs-prod-system.access',
+        indices: 478,
+        documents: 1961,
+        size: '197.4mb',
+        package: 'System',
+      }]);
+    }
+
+    return indices;
+  }
+
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
@@ -154,7 +198,7 @@ export class IndexTable extends Component {
     if (allSelected) {
       return this.setState({ selectedIndicesMap: {} });
     }
-    const { indices } = this.props;
+    const indices = this.getIndices();
     const selectedIndicesMap = {};
     indices.forEach(({ name }) => {
       selectedIndicesMap[name] = true;
@@ -183,13 +227,18 @@ export class IndexTable extends Component {
   };
 
   areAllItemsSelected = () => {
-    const { indices } = this.props;
+    const indices = this.getIndices();
     const indexOfUnselectedItem = indices.findIndex(index => !this.isItemSelected(index.name));
     return indexOfUnselectedItem === -1;
   };
 
   buildHeader() {
     const { sortField, isSortAscending } = this.props;
+    if (this.state.isManagedDataStreamsVisible) {
+      HEADERS.package = 'Package';
+    } else {
+      delete HEADERS.package;
+    }
     return Object.entries(HEADERS).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       return (
@@ -223,7 +272,29 @@ export class IndexTable extends Component {
           </EuiLink>
         </Fragment>
       );
+    } else if (fieldName === 'indices') {
+      return (
+        <Fragment>
+          <EuiLink
+            data-test-subj="indexTableIndexNameLink"
+            href=""
+          >
+            {value}
+          </EuiLink>
+        </Fragment>
+      );
     } else if (fieldName === 'policy') {
+      return (
+        <Fragment>
+          <EuiLink
+            data-test-subj="indexTableIndexNameLink"
+            href=""
+          >
+            {value}
+          </EuiLink>
+        </Fragment>
+      );
+    } else if (fieldName === 'package') {
       return (
         <Fragment>
           <EuiLink
@@ -239,11 +310,24 @@ export class IndexTable extends Component {
   }
 
   buildRowCells(index, appServices) {
+    if (this.state.isManagedDataStreamsVisible) {
+      HEADERS.package = 'Package';
+    } else {
+      delete HEADERS.package;
+    }
     return Object.keys(HEADERS).map(fieldName => {
       const { name } = index;
       const value = index[fieldName];
 
       if (fieldName === 'name') {
+        let badge;
+
+        if (this.state.isManagedDataStreamsVisible && index.package) {
+          badge = (
+            <EuiBadge color='accent'>Managed</EuiBadge>
+          );
+        }
+
         return (
           <th
             key={`${fieldName}-${name}`}
@@ -253,7 +337,7 @@ export class IndexTable extends Component {
           >
             <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
               <span className="eui-textLeft">
-                {this.buildRowCell(fieldName, value, index, appServices)}
+                {this.buildRowCell(fieldName, value, index, appServices)}{' '}{badge}
               </span>
             </div>
           </th>
@@ -336,7 +420,9 @@ export class IndexTable extends Component {
   }
 
   buildRows(appServices) {
-    const { indices = [], detailPanelIndexName } = this.props;
+    const {  detailPanelIndexName } = this.props;
+    const indices = this.getIndices();
+
     return indices.map(index => {
       const { name } = index;
       return (
@@ -404,7 +490,6 @@ export class IndexTable extends Component {
       filter,
       showSystemIndices,
       showSystemIndicesChanged,
-      indices,
       loadIndices,
       indicesLoading,
       indicesError,
@@ -413,6 +498,9 @@ export class IndexTable extends Component {
     } = this.props;
 
     let emptyState;
+
+    const indices = this.getIndices();
+
 
     if (indicesLoading) {
       emptyState = (
@@ -453,26 +541,38 @@ export class IndexTable extends Component {
                     </EuiText>
                   </EuiTitle>
                 </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      id="checkboxShowSystemIndices"
+                      checked={this.state.isManagedDataStreamsVisible}
+                      onChange={event => this.setState({ isManagedDataStreamsVisible: !this.state.isManagedDataStreamsVisible })}
+                      label={
+                        <FormattedMessage
+                          id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                          defaultMessage="Include managed data streams"
+                        />
+                      }
+                    />
+                </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="l" />
               {this.renderBanners(extensionsService)}
               {indicesError && this.renderError()}
               <EuiFlexGroup gutterSize="l" alignItems="center">
-                {atLeastOneItemSelected ? (
-                  <EuiFlexItem grow={false}>
-                    <Route
-                      key="menu"
-                      render={() => (
-                        <IndexActionsContextMenu
-                          indexNames={Object.keys(selectedIndicesMap)}
-                          resetSelection={() => {
-                            this.setState({ selectedIndicesMap: {} });
-                          }}
-                        />
-                      )}
-                    />
-                  </EuiFlexItem>
-                ) : null}
+                <EuiFlexItem grow={false}>
+                  <Route
+                    key="menu"
+                    render={() => (
+                      <IndexActionsContextMenu
+                        indexNames={Object.keys(selectedIndicesMap)}
+                        resetSelection={() => {
+                          this.setState({ selectedIndicesMap: {} });
+                        }}
+                      />
+                    )}
+                  />
+                </EuiFlexItem>
                 {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                   <Fragment>
                     <EuiFlexItem>
