@@ -43,6 +43,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   };
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
+  const [isAllDataStreams, setIsAllDataStreams] = useState<boolean>(true);
   const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(config.indices));
   const [indicesSelection, setIndicesSelection] = useState<SnapshotConfig['indices']>([...indices]);
   const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(
@@ -309,6 +310,229 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
     );
   };
 
+  const renderDataStreams = () => {
+    const dataStreamsOptions = [
+      { label: "production.logs", checked: "on" },
+      { label: "staging1.logs", checked: "on" },
+      { label: "staging2.logs", checked: "on" },
+      { label: "nginx.access", checked: "on" },
+      { label: "logs-prod-system.access", checked: "on" },
+    ];
+
+    const indicesSwitch = (
+      <EuiSwitch
+        label={
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyForm.stepSettings.allIndicesLabel"
+            defaultMessage="All data streams"
+          />
+        }
+        checked={isAllDataStreams}
+        disabled={isManagedPolicy}
+        data-test-subj="allIndicesToggle"
+        onChange={e => {
+          const isChecked = e.target.checked;
+          setIsAllDataStreams(isChecked);
+          if (isChecked) {
+            updatePolicyConfig({ dataStreams: undefined });
+          } else {
+            updatePolicyConfig({
+              dataStreams:
+                selectIndicesMode === 'custom'
+                  ? indexPatterns.join(',')
+                  : [...(indicesSelection || [])],
+            });
+          }
+        }}
+      />
+    );
+
+    return (
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepSettings.indicesTitle"
+                defaultMessage="Data streams"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyForm.stepSettings.indicesDescription"
+            defaultMessage="Data streams to back up."
+          />
+        }
+        fullWidth
+      >
+        <EuiFormRow hasEmptyLabelSpace fullWidth>
+          <Fragment>
+            {isManagedPolicy ? (
+              <EuiToolTip
+                position="left"
+                content={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.stepSettings.indicesTooltip"
+                      defaultMessage="Cloud-managed policies require all indices."
+                    />
+                  </p>
+                }
+              >
+                {indicesSwitch}
+              </EuiToolTip>
+            ) : (
+              indicesSwitch
+            )}
+            {isAllDataStreams ? null : (
+              <Fragment>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  className="snapshotRestore__policyForm__stepSettings__indicesFieldWrapper"
+                  label={
+                    selectIndicesMode === 'list' ? (
+                      <EuiFlexGroup justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesLabel"
+                            defaultMessage="Select data streams"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink
+                            onClick={() => {
+                              setSelectIndicesMode('custom');
+                              updatePolicyConfig({ indices: indexPatterns.join(',') });
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleCustomLink"
+                              defaultMessage="Use capturing pattern"
+                            />
+                          </EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      <EuiFlexGroup justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyForm.stepSettings.indicesPatternLabel"
+                            defaultMessage="Index patterns"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiLink
+                            data-test-subj="selectIndicesLink"
+                            onClick={() => {
+                              setSelectIndicesMode('list');
+                              updatePolicyConfig({ indices: indicesSelection });
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleListLink"
+                              defaultMessage="Select data streams"
+                            />
+                          </EuiLink>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )
+                  }
+                  helpText={
+                    selectIndicesMode === 'list' ? (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesHelpText"
+                        defaultMessage="5 data streams will be backed up. {selectOrDeselectAllLink}"
+                        values={{
+                          selectOrDeselectAllLink: (
+                            <EuiLink
+                              data-test-subj="deselectIndicesLink"
+                              onClick={() => {
+                                // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
+                                indicesOptions.forEach((option: EuiSelectableOption) => {
+                                  option.checked = undefined;
+                                });
+                                updatePolicyConfig({ indices: [] });
+                                setIndicesSelection([]);
+                              }}
+                            >
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.policyForm.stepSettings.deselectAllIndicesLink"
+                                defaultMessage="Deselect all"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    ) : null
+                  }
+                  isInvalid={Boolean(errors.indices)}
+                  error={errors.indices}
+                >
+                  {selectIndicesMode === 'list' ? (
+                    <EuiSelectable
+                      allowExclusions={false}
+                      options={dataStreamsOptions}
+                      onChange={options => {
+                        const newSelectedIndices: string[] = [];
+                        options.forEach(({ label, checked }) => {
+                          if (checked === 'on') {
+                            newSelectedIndices.push(label);
+                          }
+                        });
+                        setIndicesOptions(options);
+                        updatePolicyConfig({ indices: newSelectedIndices });
+                        setIndicesSelection(newSelectedIndices);
+                      }}
+                      searchable
+                      height={300}
+                    >
+                      {(list, search) => (
+                        <EuiPanel paddingSize="s" hasShadow={false}>
+                          {search}
+                          {list}
+                        </EuiPanel>
+                      )}
+                    </EuiSelectable>
+                  ) : (
+                    <EuiComboBox
+                      options={indices.map(index => ({ label: index }))}
+                      placeholder={i18n.translate(
+                        'xpack.snapshotRestore.policyForm.stepSettings.indicesPatternPlaceholder',
+                        {
+                          defaultMessage: 'Enter capturing patterns, i.e. logstash-*',
+                        }
+                      )}
+                      selectedOptions={indexPatterns.map(pattern => ({ label: pattern }))}
+                      onCreateOption={(pattern: string) => {
+                        if (!pattern.trim().length) {
+                          return;
+                        }
+                        const newPatterns = [...indexPatterns, pattern];
+                        setIndexPatterns(newPatterns);
+                        updatePolicyConfig({
+                          indices: newPatterns.join(','),
+                        });
+                      }}
+                      onChange={(patterns: Array<{ label: string }>) => {
+                        const newPatterns = patterns.map(({ label }) => label);
+                        setIndexPatterns(newPatterns);
+                        updatePolicyConfig({
+                          indices: newPatterns.join(','),
+                        });
+                      }}
+                    />
+                  )}
+                </EuiFormRow>
+              </Fragment>
+            )}
+          </Fragment>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  };
+
   const renderIgnoreUnavailableField = () => (
     <EuiDescribedFormGroup
       title={
@@ -316,7 +540,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.ignoreUnavailableDescriptionTitle"
-              defaultMessage="Ignore unavailable indices"
+              defaultMessage="Ignore unavailable data"
             />
           </h3>
         </EuiTitle>
@@ -324,7 +548,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.ignoreUnavailableDescription"
-          defaultMessage="Ignores indices that are unavailable when taking the snapshot. Otherwise, the entire snapshot will fail."
+          defaultMessage="Ignores indices and data streams that are unavailable when taking the snapshot. Otherwise, the entire snapshot will fail."
         />
       }
       fullWidth
@@ -335,7 +559,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.ignoreUnavailableLabel"
-              defaultMessage="Ignore unavailable indices"
+              defaultMessage="Ignore unavailable data"
             />
           }
           checked={Boolean(config.ignoreUnavailable)}
@@ -461,6 +685,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       <EuiSpacer size="l" />
 
       {renderIndicesField()}
+      {renderDataStreams()}
       {renderIgnoreUnavailableField()}
       {renderPartialField()}
       {renderIncludeGlobalStateField()}
