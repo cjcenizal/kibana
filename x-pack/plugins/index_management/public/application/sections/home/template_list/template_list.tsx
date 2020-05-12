@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiCallOut,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
@@ -30,11 +31,113 @@ import {
 } from '../../../services/routing';
 import { getFormatVersionFromQueryparams } from '../../../lib/index_templates';
 import { TemplateTable } from './template_table';
+import { TemplateTableV2 } from './template_table_v2';
 import { TemplateDetails } from './template_details';
 
 interface MatchParams {
   templateName?: string;
 }
+
+const templatesV2 = [{
+  "name": "triggered_watches",
+  "version": 11,
+  "priority": 2147483647,
+  "indexPatterns": [
+    ".triggered_watches*"
+  ],
+  "isManaged": false,
+  "_kbnMeta": {
+    "formatVersion": 2
+  },
+  "hasSettings": true,
+  "hasAliases": false,
+  "hasMappings": true,
+  "components": 0
+},
+{
+  "name": "ilm-history",
+  "version": 2,
+  "priority": 2147483647,
+  "indexPatterns": [
+    "ilm-history-2*"
+  ],
+  "ilmPolicy": {
+    "name": "ilm-history-ilm-policy",
+    "rollover_alias": "ilm-history-2"
+  },
+  "isManaged": true,
+  "_kbnMeta": {
+    "formatVersion": 2
+  },
+  "hasSettings": false,
+  "hasAliases": false,
+  "hasMappings": false,
+  "components": 4,
+},
+{
+  "name": "monitoring-es",
+  "version": 7000099,
+  "priority": 0,
+  "indexPatterns": [
+    ".monitoring-es-7-*"
+  ],
+  "isManaged": false,
+  "_kbnMeta": {
+    "formatVersion": 2
+  },
+  "hasSettings": false,
+  "hasAliases": false,
+  "hasMappings": false,
+  "components": 3,
+},
+{
+  "name": "watches",
+  "version": 11,
+  "priority": 2147483647,
+  "indexPatterns": [
+    ".watches*"
+  ],
+  "isManaged": true,
+  "_kbnMeta": {
+    "formatVersion": 1
+  },
+  "hasSettings": true,
+  "hasAliases": false,
+  "hasMappings": true,
+  "components": 0
+},
+{
+  "name": "ml-meta",
+  "version": 8000099,
+  "priority": 0,
+  "indexPatterns": [
+    ".ml-meta"
+  ],
+  "isManaged": true,
+  "_kbnMeta": {
+    "formatVersion": 1
+  },
+  "hasSettings": true,
+  "hasAliases": false,
+  "hasMappings": true,
+  "components": 0
+},
+{
+  "name": ".ml-config",
+  "version": 8000099,
+  "priority": 0,
+  "indexPatterns": [
+    ".ml-config"
+  ],
+  "isManaged": false,
+  "_kbnMeta": {
+    "formatVersion": 1
+  },
+  "hasSettings": true,
+  "hasAliases": false,
+  "hasMappings": true,
+  "components": 0
+}];
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -46,8 +149,6 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   const { uiMetricService } = useServices();
   const { error, isLoading, data: templates, sendRequest: reload } = useLoadIndexTemplates();
   const queryParamsFormatVersion = getFormatVersionFromQueryparams(location);
-
-  let content;
 
   const [showSystemTemplates, setShowSystemTemplates] = useState<boolean>(false);
 
@@ -74,94 +175,62 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);
 
-  if (isLoading) {
-    content = (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
-          defaultMessage="Loading templates…"
-        />
-      </SectionLoading>
-    );
-  } else if (error) {
-    content = (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
-            defaultMessage="Error loading templates"
+  const content = (
+    <Fragment>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiTitle size="s">
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.idxMgmt.home.indexTemplatesDescription"
+                defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
+              />
+            </EuiText>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            id="checkboxShowSystemIndexTemplates"
+            data-test-subj="systemTemplatesSwitch"
+            checked={showSystemTemplates}
+            onChange={event => setShowSystemTemplates(event.target.checked)}
+            label={
+              <FormattedMessage
+                id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
+                defaultMessage="Include system templates"
+              />
+            }
           />
-        }
-        error={error as Error}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+
+      <TemplateTable
+        templates={showSystemTemplates ? templates : filteredTemplates}
+        reload={reload}
+        editTemplate={editTemplate}
+        cloneTemplate={cloneTemplate}
       />
-    );
-  } else if (Array.isArray(templates) && templates.length === 0) {
-    content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1 data-test-subj="title">
-            <FormattedMessage
-              id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle"
-              defaultMessage="You don't have any templates yet"
-            />
-          </h1>
-        }
-        data-test-subj="emptyPrompt"
+
+      <EuiHorizontalRule margin="m" />
+
+      <EuiTitle size="xs">
+        <p>8.0 index templates</p>
+      </EuiTitle>
+
+      <EuiSpacer size="m" />
+
+      <TemplateTableV2
+        templates={templatesV2}
+        reload={reload}
+        editTemplate={editTemplate}
+        cloneTemplate={cloneTemplate}
       />
-    );
-  } else if (Array.isArray(templates) && templates.length > 0) {
-    content = (
-      <Fragment>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <EuiTitle size="s">
-              <EuiText color="subdued">
-                <FormattedMessage
-                  id="xpack.idxMgmt.home.indexTemplatesDescription"
-                  defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
-                />
-              </EuiText>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              id="checkboxShowSystemIndexTemplates"
-              data-test-subj="systemTemplatesSwitch"
-              checked={showSystemTemplates}
-              onChange={event => setShowSystemTemplates(event.target.checked)}
-              label={
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
-                  defaultMessage="Include system templates"
-                />
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <TemplateTable
-          templates={showSystemTemplates ? templates : filteredTemplates}
-          reload={reload}
-          editTemplate={editTemplate}
-          cloneTemplate={cloneTemplate}
-        />
-      </Fragment>
-    );
-  }
+    </Fragment>
+  );
 
   return (
     <div data-test-subj="templateList">
-      <EuiCallOut
-        title="These index templates will be deprecated in 8.0"
-        iconType="iInCircle"
-      >
-        <p>
-          Take a look at index templates (v2) to see a new, improved method of defining index
-          templates. This will become standard in 8.0.
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
       {content}
       {templateName && queryParamsFormatVersion !== undefined && (
         <TemplateDetails

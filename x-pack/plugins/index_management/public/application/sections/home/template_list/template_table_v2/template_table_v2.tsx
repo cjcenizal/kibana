@@ -7,7 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn, EuiBadge } from '@elastic/eui';
 import { TemplateListItem, IndexTemplateFormatVersion } from '../../../../../../common';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
@@ -22,7 +22,7 @@ interface Props {
   cloneTemplate: (name: string, formatVersion: IndexTemplateFormatVersion) => void;
 }
 
-export const TemplateTable: React.FunctionComponent<Props> = ({
+export const TemplateTableV2: React.FunctionComponent<Props> = ({
   templates,
   reload,
   editTemplate,
@@ -42,7 +42,16 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
+      width: 200,
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
+        let badge;
+
+        if (item.isManaged) {
+          badge = (
+            <EuiBadge color='accent'>Managed</EuiBadge>
+          );
+        }
+
         return (
           /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
@@ -50,7 +59,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             data-test-subj="templateDetailsLink"
             onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
-            {name}
+            {name}{' '}{badge}
           </EuiLink>
         );
       },
@@ -85,16 +94,36 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           </span>
         ) : null,
     },
+    // {
+    //   field: '_kbnMeta',
+    //   name: i18n.translate('xpack.idxMgmt.templateList.table.aliasesColumnTitle', {
+    //     defaultMessage: 'Version',
+    //   }),
+    //   truncateText: true,
+    //   sortable: true,
+    //   render: (_kbnMeta) => _kbnMeta.formatVersion,
+    // },
     {
-      field: 'order',
-      name: i18n.translate('xpack.idxMgmt.templateList.table.orderColumnTitle', {
-        defaultMessage: 'Order',
+      field: 'components',
+      width: 80,
+      name: i18n.translate('xpack.idxMgmt.templateList.table.aliasesColumnTitle', {
+        defaultMessage: 'Components',
       }),
       truncateText: true,
       sortable: true,
+      render: (components: number) => components === 0 ? '' : components,
     },
+    /*{
+      field: 'priority',
+      name: i18n.translate('xpack.idxMgmt.templateList.table.orderColumnTitle', {
+        defaultMessage: 'Priority',
+      }),
+      truncateText: true,
+      sortable: true,
+    },*/
     {
       field: 'hasMappings',
+      width: 80,
       name: i18n.translate('xpack.idxMgmt.templateList.table.mappingsColumnTitle', {
         defaultMessage: 'Mappings',
       }),
@@ -104,6 +133,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'hasSettings',
+      width: 80,
       name: i18n.translate('xpack.idxMgmt.templateList.table.settingsColumnTitle', {
         defaultMessage: 'Settings',
       }),
@@ -113,20 +143,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
     {
       field: 'hasAliases',
+      width: 80,
       name: i18n.translate('xpack.idxMgmt.templateList.table.aliasesColumnTitle', {
         defaultMessage: 'Aliases',
       }),
       truncateText: true,
       sortable: true,
       render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
-    },
-    {
-      name: 'Migrate',
-      truncateText: true,
-      sortable: true,
-      render: () => (
-        <EuiButton color="primary" size="s">Upgrade</EuiButton>
-      ),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
@@ -247,7 +270,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         />
       </EuiButton>,
       <EuiButton
-        href={`#${BASE_PATH}create_template`}
+        href={`#${BASE_PATH}create_template_v2`}
         fill
         iconType="plusInCircle"
         data-test-subj="createTemplateButton"

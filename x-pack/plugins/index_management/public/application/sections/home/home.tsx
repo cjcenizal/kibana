@@ -58,15 +58,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
       ),
     },
     {
-      id: 'templates-next' as Section,
-      name: (
-        <FormattedMessage
-          id="xpack.idxMgmt.home.indexTemplatesTabTitle"
-          defaultMessage="Index Templates (v2)"
-        />
-      ),
-    },
-    {
       id: 'component-templates' as Section,
       name: (
         <FormattedMessage
