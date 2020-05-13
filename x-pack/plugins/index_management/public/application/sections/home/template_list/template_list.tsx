@@ -41,7 +41,7 @@ interface MatchParams {
 const templatesV2 = [{
   "name": "triggered_watches",
   "version": 11,
-  "priority": 2147483647,
+  "priority": 120,
   "indexPatterns": [
     ".triggered_watches*"
   ],
@@ -52,12 +52,13 @@ const templatesV2 = [{
   "hasSettings": true,
   "hasAliases": false,
   "hasMappings": true,
-  "components": 0
+  "dataStream": true,
+  "components": ["addresss_analyzer", "global_settings", "watch_mappings"]
 },
 {
   "name": "ilm-history",
   "version": 2,
-  "priority": 2147483647,
+  "priority": 60,
   "indexPatterns": [
     "ilm-history-2*"
   ],
@@ -69,15 +70,16 @@ const templatesV2 = [{
   "_kbnMeta": {
     "formatVersion": 2
   },
-  "hasSettings": false,
-  "hasAliases": false,
+  "hasSettings": true,
+  "hasAliases": true,
   "hasMappings": false,
-  "components": 4,
+  "dataStream": true,
+  "components": ["global_settings", "lifecycle_mappings", "lifecycle_aliases"]
 },
 {
   "name": "monitoring-es",
   "version": 7000099,
-  "priority": 0,
+  "priority": 10,
   "indexPatterns": [
     ".monitoring-es-7-*"
   ],
@@ -88,12 +90,13 @@ const templatesV2 = [{
   "hasSettings": false,
   "hasAliases": false,
   "hasMappings": false,
-  "components": 3,
+  "dataStream": false,
+  "components": ["global_settings", "monitoring_aliases"]
 },
 {
   "name": "watches",
   "version": 11,
-  "priority": 2147483647,
+  "priority": 20,
   "indexPatterns": [
     ".watches*"
   ],
@@ -101,15 +104,16 @@ const templatesV2 = [{
   "_kbnMeta": {
     "formatVersion": 1
   },
-  "hasSettings": true,
-  "hasAliases": false,
+  "hasSettings": false,
+  "hasAliases": true,
   "hasMappings": true,
-  "components": 0
+  "dataStream": true,
+  "components": []
 },
 {
   "name": "ml-meta",
   "version": 8000099,
-  "priority": 0,
+  "priority": 30,
   "indexPatterns": [
     ".ml-meta"
   ],
@@ -119,13 +123,14 @@ const templatesV2 = [{
   },
   "hasSettings": true,
   "hasAliases": false,
-  "hasMappings": true,
-  "components": 0
+  "hasMappings": false,
+  "dataStream": true,
+  "components": []
 },
 {
   "name": ".ml-config",
   "version": 8000099,
-  "priority": 0,
+  "priority": 90,
   "indexPatterns": [
     ".ml-config"
   ],
@@ -136,7 +141,8 @@ const templatesV2 = [{
   "hasSettings": true,
   "hasAliases": false,
   "hasMappings": true,
-  "components": 0
+  "dataStream": false,
+  "components": ["global_settings", "anomaly_mappings", "anomaly_analyzer"]
 }];
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -215,7 +221,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
       <EuiHorizontalRule margin="m" />
 
       <EuiTitle size="xs">
-        <p>8.0 index templates</p>
+        <p>Composable index templates</p>
       </EuiTitle>
 
       <EuiSpacer size="m" />

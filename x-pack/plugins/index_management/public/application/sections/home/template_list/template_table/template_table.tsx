@@ -248,14 +248,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       </EuiButton>,
       <EuiButton
         href={`#${BASE_PATH}create_template`}
-        fill
         iconType="plusInCircle"
         data-test-subj="createTemplateButton"
         key="createTemplateButton"
       >
         <FormattedMessage
           id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
-          defaultMessage="Create a template"
+          defaultMessage="Create legacy template"
         />
       </EuiButton>,
     ],

@@ -74,6 +74,16 @@ export const TemplateTableV2: React.FunctionComponent<Props> = ({
       render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
     },
     {
+      field: 'dataStream',
+      width: 100,
+      name: i18n.translate('xpack.idxMgmt.templateList.table.settingsColumnTitle', {
+        defaultMessage: 'Data stream',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (dataStream: boolean) => (dataStream ? <EuiIcon type="check" /> : null),
+    },
+    {
       field: 'ilmPolicy',
       name: i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyColumnTitle', {
         defaultMessage: 'ILM policy',
@@ -105,23 +115,40 @@ export const TemplateTableV2: React.FunctionComponent<Props> = ({
     // },
     {
       field: 'components',
-      width: 80,
+      width: 300,
       name: i18n.translate('xpack.idxMgmt.templateList.table.aliasesColumnTitle', {
         defaultMessage: 'Components',
       }),
       truncateText: true,
       sortable: true,
-      render: (components: number) => components === 0 ? '' : components,
+      render: (components: string[]) => components.join(', '),
     },
-    /*{
+    {
       field: 'priority',
+      width: 60,
       name: i18n.translate('xpack.idxMgmt.templateList.table.orderColumnTitle', {
         defaultMessage: 'Priority',
       }),
       truncateText: true,
       sortable: true,
-    },*/
+    },
     {
+      name: 'Overrides',
+      width: 80,
+      truncateText: true,
+      sortable: true,
+      render: (item) => {
+        const { hasMappings, hasSettings, hasAliases } = item;
+        return (
+          <>
+            <EuiBadge color={hasMappings ? 'primary' : 'hollow'} size="s">M</EuiBadge>
+            <EuiBadge color={hasSettings ? 'primary' : 'hollow'} size="s">S</EuiBadge>
+            <EuiBadge color={hasAliases ? 'primary' : 'hollow'} size="s">A</EuiBadge>
+          </>
+        );
+      },
+    },
+    /*{
       field: 'hasMappings',
       width: 80,
       name: i18n.translate('xpack.idxMgmt.templateList.table.mappingsColumnTitle', {
@@ -150,7 +177,7 @@ export const TemplateTableV2: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
-    },
+    },*/
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
         defaultMessage: 'Actions',
@@ -278,7 +305,7 @@ export const TemplateTableV2: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
-          defaultMessage="Create a template"
+          defaultMessage="Create composable template"
         />
       </EuiButton>,
     ],
