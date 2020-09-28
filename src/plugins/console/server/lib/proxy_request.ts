@@ -82,6 +82,9 @@ export const proxyRequest = ({
       ...finalUserHeaders,
       'content-type': 'application/json',
       'transfer-encoding': 'chunked',
+      // Identify Console requests so ES can un-suppress deprecation warnings which it's suppressing
+      // for other requests that come from Kibana.
+      'x-kbn-plugin-origin': 'console',
     },
     agent,
   });
