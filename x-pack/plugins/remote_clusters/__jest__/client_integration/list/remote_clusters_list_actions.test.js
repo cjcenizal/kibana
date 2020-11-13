@@ -37,12 +37,11 @@ describe('<RemoteClusterList />', () => {
   let tableCellsValues;
   let rows;
 
-  // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
-  // in the table list that is rendered. As the table orders alphabetically by index name
-  // we prefix the random name to make sure that remoteCluster1 name comes before remoteCluster2.
-  const remoteCluster1 = getRemoteClusterMock({ name: `a${getRandomString()}` });
+  // The table orders the remote clusters alphabetically by name. So the names chosen here drive
+  // test determinism.
+  const remoteCluster1 = getRemoteClusterMock({ name: 'remoteCluster1' });
   const remoteCluster2 = getRemoteClusterMock({
-    name: `b${getRandomString()}`,
+    name: 'remoteCluster2',
     isConnected: false,
     connectedSocketsCount: 0,
     proxyAddress: 'localhost:9500',
@@ -52,7 +51,7 @@ describe('<RemoteClusterList />', () => {
     connectedNodesCount: null,
   });
   const remoteCluster3 = getRemoteClusterMock({
-    name: `c${getRandomString()}`,
+    name: 'remoteCluster3',
     isConnected: false,
     connectedSocketsCount: 0,
     proxyAddress: 'localhost:9500',

@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { act } from 'react-dom/test-utils';
-
 import { getRouter } from '../../../public/application/services';
-import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
-
-import { PROXY_MODE } from '../../../common/constants';
-
-import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
-
+import { PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
+import { setupEnvironment } from '../helpers';
 import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList /> detail panel', () => {
@@ -27,58 +21,59 @@ describe('<RemoteClusterList /> detail panel', () => {
     server.restore();
   });
 
-  httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
-
-  let find;
-  let exists;
-  let component;
-  let table;
-  let actions;
-  let tableCellsValues;
-  let rows;
-
-  // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
-  // in the table list that is rendered. As the table orders alphabetically by index name
-  // we prefix the random name to make sure that remoteCluster1 name comes before remoteCluster2.
-  const remoteCluster1 = getRemoteClusterMock({ name: `a${getRandomString()}` });
-  const remoteCluster2 = getRemoteClusterMock({
-    name: `b${getRandomString()}`,
-    isConnected: false,
-    connectedSocketsCount: 0,
-    proxyAddress: 'localhost:9500',
-    isConfiguredByNode: true,
-    mode: PROXY_MODE,
-    seeds: null,
-    connectedNodesCount: null,
-  });
-  const remoteCluster3 = getRemoteClusterMock({
-    name: `c${getRandomString()}`,
-    isConnected: false,
-    connectedSocketsCount: 0,
-    proxyAddress: 'localhost:9500',
-    isConfiguredByNode: false,
-    mode: PROXY_MODE,
-    hasDeprecatedProxySetting: true,
-    seeds: null,
-    connectedNodesCount: null,
-  });
-
-  const remoteClusters = [remoteCluster1, remoteCluster2, remoteCluster3];
+  let testBed;
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-
-    await act(async () => {
-      ({ component, find, exists, table, actions } = setup());
-    });
-
-    component.update();
-
-    // Read the remote clusters list table
-    ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
+    // The table orders the remote clusters alphabetically by name. So the names chosen here drive
+    // test determinism.
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+      {
+        name: 'remoteCluster1',
+        isConnected: true,
+        connectedSocketsCount: 0,
+        proxyAddress: 'localhost:9500',
+        isConfiguredByNode: false,
+        mode: SNIFF_MODE,
+        hasDeprecatedProxySetting: false,
+        seeds: ['localhost:9400'],
+        connectedNodesCount: 1,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+      },
+      {
+        name: 'remoteCluster2',
+        isConnected: false,
+        connectedSocketsCount: 0,
+        proxyAddress: 'localhost:9500',
+        isConfiguredByNode: true,
+        mode: PROXY_MODE,
+        seeds: null,
+        connectedNodesCount: null,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+      },
+      {
+        name: 'remoteCluster3',
+        isConnected: false,
+        connectedSocketsCount: 0,
+        proxyAddress: 'localhost:9500',
+        isConfiguredByNode: false,
+        mode: PROXY_MODE,
+        hasDeprecatedProxySetting: true,
+        seeds: null,
+        connectedNodesCount: null,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+      },
+    ]);
+    testBed = await setup();
   });
 
   test('should open a detail panel when clicking on a remote cluster', () => {
+    const { exists, actions } = testBed;
     expect(exists('remoteClusterDetailFlyout')).toBe(false);
 
     actions.clickRemoteClusterAt(0);
@@ -87,34 +82,32 @@ describe('<RemoteClusterList /> detail panel', () => {
   });
 
   test('should set the title to the remote cluster selected', () => {
+    const { find, actions } = testBed;
     actions.clickRemoteClusterAt(0); // Select remote cluster and open the detail panel
-    expect(find('remoteClusterDetailsFlyoutTitle').text()).toEqual(remoteCluster1.name);
+    expect(find('remoteClusterDetailsFlyoutTitle').text()).toEqual('remoteCluster1');
   });
 
   test('should have a "Status" section', () => {
+    const { find, exists, actions } = testBed;
     actions.clickRemoteClusterAt(0);
     expect(find('remoteClusterDetailPanelStatusSection').find('h3').text()).toEqual('Status');
     expect(exists('remoteClusterDetailPanelStatusValues')).toBe(true);
   });
 
   test('should set the correct remote cluster status values', () => {
+    const { find, actions } = testBed;
     actions.clickRemoteClusterAt(0);
 
     expect(find('remoteClusterDetailIsConnected').text()).toEqual('Connected');
-    expect(find('remoteClusterDetailConnectedNodesCount').text()).toEqual(
-      remoteCluster1.connectedNodesCount.toString()
-    );
-    expect(find('remoteClusterDetailSeeds').text()).toEqual(remoteCluster1.seeds.join(' '));
+    expect(find('remoteClusterDetailConnectedNodesCount').text()).toEqual('1');
+    expect(find('remoteClusterDetailSeeds').text()).toEqual('localhost:9400');
     expect(find('remoteClusterDetailSkipUnavailable').text()).toEqual('No');
-    expect(find('remoteClusterDetailMaxConnections').text()).toEqual(
-      remoteCluster1.maxConnectionsPerCluster.toString()
-    );
-    expect(find('remoteClusterDetailInitialConnectTimeout').text()).toEqual(
-      remoteCluster1.initialConnectTimeout
-    );
+    expect(find('remoteClusterDetailMaxConnections').text()).toEqual('3');
+    expect(find('remoteClusterDetailInitialConnectTimeout').text()).toEqual('30s');
   });
 
   test('should have a "close", "delete" and "edit" button in the footer', () => {
+    const { exists, actions } = testBed;
     actions.clickRemoteClusterAt(0);
     expect(exists('remoteClusterDetailsPanelCloseButton')).toBe(true);
     expect(exists('remoteClusterDetailPanelRemoveButton')).toBe(true);
@@ -122,6 +115,7 @@ describe('<RemoteClusterList /> detail panel', () => {
   });
 
   test('should close the detail panel when clicking the "close" button', () => {
+    const { find, exists, actions } = testBed;
     actions.clickRemoteClusterAt(0); // open the detail panel
     expect(exists('remoteClusterDetailFlyout')).toBe(true);
 
@@ -131,6 +125,7 @@ describe('<RemoteClusterList /> detail panel', () => {
   });
 
   test('should open a confirmation modal when clicking the "delete" button', () => {
+    const { find, exists, actions } = testBed;
     actions.clickRemoteClusterAt(0);
     expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
 
@@ -140,6 +135,7 @@ describe('<RemoteClusterList /> detail panel', () => {
   });
 
   test('should display a "Remote cluster not found" when providing a wrong cluster name', async () => {
+    const { exists, component } = testBed;
     expect(exists('remoteClusterDetailFlyout')).toBe(false);
 
     getRouter().history.replace({ search: `?cluster=wrong-cluster` });
@@ -150,6 +146,7 @@ describe('<RemoteClusterList /> detail panel', () => {
   });
 
   test('should display a warning when the cluster is configured by node', () => {
+    const { exists, actions } = testBed;
     actions.clickRemoteClusterAt(0); // the remoteCluster1 has *not* been configured by node
     expect(exists('remoteClusterConfiguredByNodeWarning')).toBe(false);
 

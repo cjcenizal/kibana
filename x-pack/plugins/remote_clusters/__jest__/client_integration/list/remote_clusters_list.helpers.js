@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { act } from 'react-dom/test-utils';
 
+import { act } from 'react-dom/test-utils';
 import { registerTestBed, findTestSubject } from '../../../../../test_utils';
 
 import { RemoteClusterList } from '../../../public/application/sections/remote_cluster_list';
@@ -20,8 +20,13 @@ const testBedConfig = {
 
 const initTestBed = registerTestBed(RemoteClusterList, testBedConfig);
 
-export const setup = (props) => {
-  const testBed = initTestBed(props);
+export const setup = async (props) => {
+  let testBed;
+
+  await act(async () => {
+    testBed = initTestBed(props);
+  });
+
   const EUI_TABLE = 'remoteClusterListTable';
 
   // User actions
@@ -30,24 +35,16 @@ export const setup = (props) => {
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
 
-    act(() => {
-      checkBox.simulate('change', { target: { checked: true } });
-    });
-
-    testBed.component.update();
+    checkBox.simulate('change', { target: { checked: true } });
   };
 
   const clickBulkDeleteButton = () => {
-    const { find, component } = testBed;
-    act(() => {
-      find('remoteClusterBulkDeleteButton').simulate('click');
-    });
-
-    component.update();
+    const { find } = testBed;
+    find('remoteClusterBulkDeleteButton').simulate('click');
   };
 
   const clickRowActionButtonAt = (index = 0, action = 'delete') => {
-    const { table, component } = testBed;
+    const { table } = testBed;
     const { rows } = table.getMetaData(EUI_TABLE);
     const indexLastColumn = rows[index].columns.length - 1;
     const tableCellActions = rows[index].columns[indexLastColumn].reactWrapper;
@@ -63,48 +60,31 @@ export const setup = (props) => {
       throw new Error(`Button for action "${action}" not found.`);
     }
 
-    act(() => {
-      button.simulate('click');
-    });
-
-    component.update();
+    button.simulate('click');
   };
 
   const clickConfirmModalDeleteRemoteCluster = () => {
-    const { find, component } = testBed;
+    const { find } = testBed;
     const modal = find('remoteClustersDeleteConfirmModal');
-
-    act(() => {
-      findTestSubject(modal, 'confirmModalConfirmButton').simulate('click');
-    });
-
-    component.update();
+    findTestSubject(modal, 'confirmModalConfirmButton').simulate('click');
   };
 
   const clickRemoteClusterAt = (index = 0) => {
-    const { table, component } = testBed;
+    const { table } = testBed;
     const { rows } = table.getMetaData(EUI_TABLE);
     const remoteClusterLink = findTestSubject(
       rows[index].reactWrapper,
       'remoteClustersTableListClusterLink'
     );
-
-    act(() => {
-      remoteClusterLink.simulate('click');
-    });
-
-    component.update();
+    remoteClusterLink.simulate('click');
   };
 
   const clickPaginationNextButton = () => {
-    const { find, component } = testBed;
-
-    act(() => {
-      find('remoteClusterListTable.pagination-button-next').simulate('click');
-    });
-
-    component.update();
+    const { find } = testBed;
+    find('remoteClusterListTable.pagination-button-next').simulate('click');
   };
+
+  testBed.component.update();
 
   return {
     ...testBed,
