@@ -6,8 +6,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
 import { setupEnvironment, findTestSubject } from '../helpers';
+import { loadRemoteClustersResponse } from './load_remote_clusters_response';
 import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList />', () => {
@@ -25,51 +25,7 @@ describe('<RemoteClusterList />', () => {
   let testBed;
 
   beforeEach(async () => {
-    // The table orders the remote clusters alphabetically by name. So the names chosen here drive
-    // test determinism.
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse([
-      {
-        name: 'remoteCluster1',
-        isConnected: true,
-        connectedSocketsCount: 0,
-        proxyAddress: 'localhost:9500',
-        isConfiguredByNode: false,
-        mode: SNIFF_MODE,
-        hasDeprecatedProxySetting: false,
-        seeds: ['localhost:9400'],
-        connectedNodesCount: 1,
-        maxConnectionsPerCluster: 3,
-        initialConnectTimeout: '30s',
-        skipUnavailable: false,
-      },
-      {
-        name: 'remoteCluster2',
-        isConnected: false,
-        connectedSocketsCount: 0,
-        proxyAddress: 'localhost:9500',
-        isConfiguredByNode: true,
-        mode: PROXY_MODE,
-        seeds: null,
-        connectedNodesCount: null,
-        maxConnectionsPerCluster: 3,
-        initialConnectTimeout: '30s',
-        skipUnavailable: false,
-      },
-      {
-        name: 'remoteCluster3',
-        isConnected: false,
-        connectedSocketsCount: 0,
-        proxyAddress: 'localhost:9500',
-        isConfiguredByNode: false,
-        mode: PROXY_MODE,
-        hasDeprecatedProxySetting: true,
-        seeds: null,
-        connectedNodesCount: null,
-        maxConnectionsPerCluster: 3,
-        initialConnectTimeout: '30s',
-        skipUnavailable: false,
-      },
-    ]);
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse(loadRemoteClustersResponse);
     testBed = await setup();
   });
 
