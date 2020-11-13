@@ -31,9 +31,14 @@ export const setup = async (props) => {
 
   const EUI_TABLE = 'remoteClusterListTable';
 
+  const getRemoteClustersTableRows = () => {
+    const { table } = testBed;
+    return table.getMetaData(EUI_TABLE).rows;
+  };
+
   // User actions
   const selectRemoteClusterAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData(EUI_TABLE);
+    const rows = getRemoteClustersTableRows();
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
 
@@ -46,8 +51,7 @@ export const setup = async (props) => {
   };
 
   const clickRowActionButtonAt = (index = 0, action = 'delete') => {
-    const { table } = testBed;
-    const { rows } = table.getMetaData(EUI_TABLE);
+    const rows = getRemoteClustersTableRows();
     const indexLastColumn = rows[index].columns.length - 1;
     const tableCellActions = rows[index].columns[indexLastColumn].reactWrapper;
 
@@ -72,8 +76,7 @@ export const setup = async (props) => {
   };
 
   const clickRemoteClusterAt = (index = 0) => {
-    const { table } = testBed;
-    const { rows } = table.getMetaData(EUI_TABLE);
+    const rows = getRemoteClustersTableRows();
     const remoteClusterLink = findTestSubject(
       rows[index].reactWrapper,
       'remoteClustersTableListClusterLink'
@@ -103,6 +106,7 @@ export const setup = async (props) => {
 
   return {
     ...testBed,
+    getRemoteClustersTableRows,
     isDetailPanelVisible,
     getDetailPanelTitle,
     getDetailPanelStatusHeading,

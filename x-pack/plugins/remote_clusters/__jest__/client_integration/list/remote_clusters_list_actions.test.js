@@ -6,13 +6,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { getRouter } from '../../../public/application/services';
-import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
-
-import { PROXY_MODE } from '../../../common/constants';
-
-import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
-
+import { PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
+import { setupEnvironment, findTestSubject } from '../helpers';
 import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList />', () => {
@@ -27,58 +22,60 @@ describe('<RemoteClusterList />', () => {
     server.restore();
   });
 
-  httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
-
-  let find;
-  let exists;
-  let component;
-  let table;
-  let actions;
-  let tableCellsValues;
-  let rows;
-
-  // The table orders the remote clusters alphabetically by name. So the names chosen here drive
-  // test determinism.
-  const remoteCluster1 = getRemoteClusterMock({ name: 'remoteCluster1' });
-  const remoteCluster2 = getRemoteClusterMock({
-    name: 'remoteCluster2',
-    isConnected: false,
-    connectedSocketsCount: 0,
-    proxyAddress: 'localhost:9500',
-    isConfiguredByNode: true,
-    mode: PROXY_MODE,
-    seeds: null,
-    connectedNodesCount: null,
-  });
-  const remoteCluster3 = getRemoteClusterMock({
-    name: 'remoteCluster3',
-    isConnected: false,
-    connectedSocketsCount: 0,
-    proxyAddress: 'localhost:9500',
-    isConfiguredByNode: false,
-    mode: PROXY_MODE,
-    hasDeprecatedProxySetting: true,
-    seeds: null,
-    connectedNodesCount: null,
-  });
-
-  const remoteClusters = [remoteCluster1, remoteCluster2, remoteCluster3];
+  let testBed;
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-
-    await act(async () => {
-      ({ component, find, exists, table, actions } = setup());
-    });
-
-    component.update();
-
-    // Read the remote clusters list table
-    ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
+    // The table orders the remote clusters alphabetically by name. So the names chosen here drive
+    // test determinism.
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+      {
+        name: 'remoteCluster1',
+        isConnected: true,
+        connectedSocketsCount: 0,
+        proxyAddress: 'localhost:9500',
+        isConfiguredByNode: false,
+        mode: SNIFF_MODE,
+        hasDeprecatedProxySetting: false,
+        seeds: ['localhost:9400'],
+        connectedNodesCount: 1,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+      },
+      {
+        name: 'remoteCluster2',
+        isConnected: false,
+        connectedSocketsCount: 0,
+        proxyAddress: 'localhost:9500',
+        isConfiguredByNode: true,
+        mode: PROXY_MODE,
+        seeds: null,
+        connectedNodesCount: null,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+      },
+      {
+        name: 'remoteCluster3',
+        isConnected: false,
+        connectedSocketsCount: 0,
+        proxyAddress: 'localhost:9500',
+        isConfiguredByNode: false,
+        mode: PROXY_MODE,
+        hasDeprecatedProxySetting: true,
+        seeds: null,
+        connectedNodesCount: null,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+      },
+    ]);
+    testBed = await setup();
   });
 
   describe('bulk delete button', () => {
     test('should be visible when a remote cluster is selected', () => {
+      const { exists, actions } = testBed;
       expect(exists('remoteClusterBulkDeleteButton')).toBe(false);
 
       actions.selectRemoteClusterAt(0);
@@ -87,6 +84,7 @@ describe('<RemoteClusterList />', () => {
     });
 
     test('should update the button label if more than 1 remote cluster is selected', () => {
+      const { find, actions } = testBed;
       actions.selectRemoteClusterAt(0);
 
       const button = find('remoteClusterBulkDeleteButton');
@@ -97,6 +95,7 @@ describe('<RemoteClusterList />', () => {
     });
 
     test('should open a confirmation modal when clicking on it', () => {
+      const { exists, actions } = testBed;
       expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
 
       actions.selectRemoteClusterAt(0);
@@ -108,6 +107,8 @@ describe('<RemoteClusterList />', () => {
 
   describe('table row actions', () => {
     test('should have a "delete" and an "edit" action button on each row', () => {
+      const { getRemoteClustersTableRows } = testBed;
+      const rows = getRemoteClustersTableRows();
       const indexLastColumn = rows[0].columns.length - 1;
       const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
 
@@ -119,6 +120,7 @@ describe('<RemoteClusterList />', () => {
     });
 
     test('should open a confirmation modal when clicking on "delete" button', async () => {
+      const { exists, actions } = testBed;
       expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
 
       actions.clickRowActionButtonAt(0, 'delete');
@@ -129,12 +131,14 @@ describe('<RemoteClusterList />', () => {
 
   describe('confirmation modal (delete remote cluster)', () => {
     test('should remove the remote cluster from the table after delete is successful', async () => {
+      const { actions, getRemoteClustersTableRows, component } = testBed;
       // Mock HTTP DELETE request
       httpRequestsMockHelpers.setDeleteRemoteClusterResponse({
-        itemsDeleted: [remoteCluster1.name],
+        itemsDeleted: ['remoteCluster1'],
         errors: [],
       });
 
+      let rows = getRemoteClustersTableRows();
       // Make sure that we have our 3 remote clusters in the table
       expect(rows.length).toBe(3);
 
@@ -148,10 +152,9 @@ describe('<RemoteClusterList />', () => {
 
       component.update();
 
-      ({ rows } = table.getMetaData('remoteClusterListTable'));
-
+      rows = getRemoteClustersTableRows();
       expect(rows.length).toBe(2);
-      expect(rows[0].columns[1].value).toEqual(remoteCluster2.name);
+      expect(rows[0].columns[1].value).toEqual('remoteCluster2');
     });
   });
 });
