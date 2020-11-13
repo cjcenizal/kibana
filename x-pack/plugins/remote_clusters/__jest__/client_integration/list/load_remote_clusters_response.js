@@ -51,3 +51,17 @@ export const loadRemoteClustersResponse = [
     skipUnavailable: false,
   },
 ];
+
+export const loadRemoteClustersResponseMultiplePages = [
+  {
+    name: 'unique',
+    seeds: [],
+  },
+];
+
+for (let i = 0; i < 29; i++) {
+  loadRemoteClustersResponseMultiplePages.push({
+    name: `name${i}`,
+    seeds: [],
+  });
+}

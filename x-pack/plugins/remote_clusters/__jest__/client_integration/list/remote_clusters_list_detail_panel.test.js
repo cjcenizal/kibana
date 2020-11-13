@@ -5,8 +5,8 @@
  */
 
 import { getRouter } from '../../../public/application/services';
-import { loadRemoteClustersResponse } from './load_remote_clusters_response';
 import { setupEnvironment } from '../helpers';
+import { loadRemoteClustersResponse } from './load_remote_clusters_response';
 import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList /> detail panel', () => {

@@ -20,11 +20,11 @@ const testBedConfig = {
 
 const initTestBed = registerTestBed(RemoteClusterList, testBedConfig);
 
-export const setup = async (props) => {
+export const setup = async () => {
   let testBed;
 
   await act(async () => {
-    testBed = initTestBed(props);
+    testBed = initTestBed();
   });
 
   testBed.component.update();
@@ -34,6 +34,11 @@ export const setup = async (props) => {
   const getRemoteClustersTableRows = () => {
     const { table } = testBed;
     return table.getMetaData(EUI_TABLE).rows;
+  };
+
+  const getRemoteClustersTableCellValues = () => {
+    const { table } = testBed;
+    return table.getMetaData(EUI_TABLE).tableCellsValues;
   };
 
   // User actions
@@ -107,6 +112,7 @@ export const setup = async (props) => {
   return {
     ...testBed,
     getRemoteClustersTableRows,
+    getRemoteClustersTableCellValues,
     isDetailPanelVisible,
     getDetailPanelTitle,
     getDetailPanelStatusHeading,

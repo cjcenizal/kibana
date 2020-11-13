@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { act } from 'react-dom/test-utils';
-
-import { getRouter } from '../../../public/application/services';
-import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
-
-import { PROXY_MODE } from '../../../common/constants';
-
-import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
-
+import { setupEnvironment, findTestSubject } from '../helpers';
+import {
+  loadRemoteClustersResponse,
+  loadRemoteClustersResponseMultiplePages,
+} from './load_remote_clusters_response';
 import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList />', () => {
@@ -27,181 +23,93 @@ describe('<RemoteClusterList />', () => {
     server.restore();
   });
 
-  httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
-
-  describe('on component mount', () => {
-    let exists;
-
-    beforeEach(() => {
-      ({ exists } = setup());
-    });
-
-    test('should show a "loading remote clusters" indicator', () => {
-      expect(exists('remoteClustersTableLoading')).toBe(true);
-    });
-  });
-
   describe('when there are no remote clusters', () => {
-    let exists;
-    let component;
+    let testBed;
 
     beforeEach(async () => {
-      await act(async () => {
-        ({ exists, component } = setup());
-      });
-
-      component.update();
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
+      testBed = await setup();
     });
 
     test('should display an empty prompt', async () => {
+      const { exists } = testBed;
       expect(exists('remoteClusterListEmptyPrompt')).toBe(true);
     });
 
     test('should have a button to create a remote cluster', async () => {
+      const { exists } = testBed;
       expect(exists('remoteClusterEmptyPromptCreateButton')).toBe(true);
     });
   });
 
   describe('when there are multiple pages of remote clusters', () => {
-    let find;
-    let table;
-    let actions;
-    let component;
-    let form;
-
-    const remoteClusters = [
-      {
-        name: 'unique',
-        seeds: [],
-      },
-    ];
-
-    for (let i = 0; i < 29; i++) {
-      remoteClusters.push({
-        name: `name${i}`,
-        seeds: [],
-      });
-    }
+    let testBed;
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-
-      await act(async () => {
-        ({ find, table, actions, form, component } = setup());
-      });
-
-      component.update();
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(
+        loadRemoteClustersResponseMultiplePages
+      );
+      testBed = await setup();
     });
 
     test('pagination works', () => {
+      const { actions, getRemoteClustersTableCellValues } = testBed;
       actions.clickPaginationNextButton();
-      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      const cellValues = getRemoteClustersTableCellValues();
 
       // Pagination defaults to 20 remote clusters per page. We loaded 30 remote clusters,
       // so the second page should have 10.
-      expect(tableCellsValues.length).toBe(10);
+      expect(cellValues.length).toBe(10);
     });
 
     // Skipped until we can figure out how to get this test to work.
     test.skip('search works', () => {
+      const { form, find, getRemoteClustersTableCellValues } = testBed;
       form.setInputValue(find('remoteClusterSearch'), 'unique');
-      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
-      expect(tableCellsValues.length).toBe(1);
+      const cellValues = getRemoteClustersTableCellValues();
+      expect(cellValues.length).toBe(1);
     });
   });
 
   describe('when there are remote clusters', () => {
-    let find;
-    let exists;
-    let component;
-    let table;
-    let actions;
-    let tableCellsValues;
-    let rows;
-
-    // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
-    // in the table list that is rendered. As the table orders alphabetically by index name
-    // we prefix the random name to make sure that remoteCluster1 name comes before remoteCluster2.
-    const remoteCluster1 = getRemoteClusterMock({ name: `a${getRandomString()}` });
-    const remoteCluster2 = getRemoteClusterMock({
-      name: `b${getRandomString()}`,
-      isConnected: false,
-      connectedSocketsCount: 0,
-      proxyAddress: 'localhost:9500',
-      isConfiguredByNode: true,
-      mode: PROXY_MODE,
-      seeds: null,
-      connectedNodesCount: null,
-    });
-    const remoteCluster3 = getRemoteClusterMock({
-      name: `c${getRandomString()}`,
-      isConnected: false,
-      connectedSocketsCount: 0,
-      proxyAddress: 'localhost:9500',
-      isConfiguredByNode: false,
-      mode: PROXY_MODE,
-      hasDeprecatedProxySetting: true,
-      seeds: null,
-      connectedNodesCount: null,
-    });
-
-    const remoteClusters = [remoteCluster1, remoteCluster2, remoteCluster3];
+    let testBed;
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-
-      await act(async () => {
-        ({ component, find, exists, table, actions } = setup());
-      });
-
-      component.update();
-
-      // Read the remote clusters list table
-      ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(loadRemoteClustersResponse);
+      testBed = await setup();
     });
 
     test('should not display the empty prompt', () => {
+      const { exists } = testBed;
       expect(exists('remoteClusterListEmptyPrompt')).toBe(false);
     });
 
     test('should have a button to create a remote cluster', () => {
+      const { exists } = testBed;
       expect(exists('remoteClusterCreateButton')).toBe(true);
     });
 
     test('should list the remote clusters in the table', () => {
-      expect(tableCellsValues.length).toEqual(remoteClusters.length);
-      expect(tableCellsValues).toEqual([
+      const { getRemoteClustersTableCellValues } = testBed;
+      const cellValues = getRemoteClustersTableCellValues();
+      expect(cellValues).toEqual([
         [
           '', // Empty because the first column is the checkbox to select the row
-          remoteCluster1.name,
+          'remoteCluster1',
           'Connected',
           'default',
-          remoteCluster1.seeds.join(', '),
-          remoteCluster1.connectedNodesCount.toString(),
+          'localhost:9400',
+          '1',
           '', // Empty because the last column is for the "actions" on the resource
         ],
-        [
-          '',
-          remoteCluster2.name,
-          'Not connected',
-          PROXY_MODE,
-          remoteCluster2.proxyAddress,
-          remoteCluster2.connectedSocketsCount.toString(),
-          '',
-        ],
-        [
-          '',
-          remoteCluster3.name,
-          'Not connected',
-          PROXY_MODE,
-          remoteCluster2.proxyAddress,
-          remoteCluster2.connectedSocketsCount.toString(),
-          '',
-        ],
+        ['', 'remoteCluster2', 'Not connected', 'proxy', 'localhost:9500', '0', ''],
+        ['', 'remoteCluster3', 'Not connected', 'proxy', 'localhost:9500', '0', ''],
       ]);
     });
 
     test('should have a tooltip to indicate that the cluster has been defined in elasticsearch.yml', () => {
+      const { getRemoteClustersTableRows } = testBed;
+      const rows = getRemoteClustersTableRows();
       const secondRow = rows[1].reactWrapper; // The second cluster has been defined by node
       expect(
         findTestSubject(secondRow, 'remoteClustersTableListClusterDefinedByNodeTooltip').length
@@ -209,6 +117,8 @@ describe('<RemoteClusterList />', () => {
     });
 
     test('should have a tooltip to indicate that the cluster has a deprecated setting', () => {
+      const { getRemoteClustersTableRows } = testBed;
+      const rows = getRemoteClustersTableRows();
       const secondRow = rows[2].reactWrapper; // The third cluster has been defined with deprecated setting
       expect(
         findTestSubject(secondRow, 'remoteClustersTableListClusterWithDeprecatedSettingTooltip')
