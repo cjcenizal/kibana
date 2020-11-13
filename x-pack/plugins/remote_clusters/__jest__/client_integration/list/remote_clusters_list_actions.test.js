@@ -74,7 +74,7 @@ describe('<RemoteClusterList />', () => {
   });
 
   describe('bulk delete button', () => {
-    test('should be visible when a remote cluster is selected', () => {
+    test('is visible when a remote cluster is selected', () => {
       const { exists, actions } = testBed;
       expect(exists('remoteClusterBulkDeleteButton')).toBe(false);
 
@@ -83,7 +83,7 @@ describe('<RemoteClusterList />', () => {
       expect(exists('remoteClusterBulkDeleteButton')).toBe(true);
     });
 
-    test('should update the button label if more than 1 remote cluster is selected', () => {
+    test('updates the button label if more than 1 remote cluster is selected', () => {
       const { find, actions } = testBed;
       actions.selectRemoteClusterAt(0);
 
@@ -94,7 +94,7 @@ describe('<RemoteClusterList />', () => {
       expect(button.text()).toEqual('Remove 2 remote clusters');
     });
 
-    test('should open a confirmation modal when clicking on it', () => {
+    test('opens a confirmation modal when clicking on it', () => {
       const { exists, actions } = testBed;
       expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
 
@@ -106,7 +106,7 @@ describe('<RemoteClusterList />', () => {
   });
 
   describe('table row actions', () => {
-    test('should have a "delete" and an "edit" action button on each row', () => {
+    test('has a "delete" and an "edit" action button on each row', () => {
       const { getRemoteClustersTableRows } = testBed;
       const rows = getRemoteClustersTableRows();
       const indexLastColumn = rows[0].columns.length - 1;
@@ -119,7 +119,7 @@ describe('<RemoteClusterList />', () => {
       expect(editButton.length).toBe(1);
     });
 
-    test('should open a confirmation modal when clicking on "delete" button', async () => {
+    test('opens a confirmation modal when clicking on "delete" button', async () => {
       const { exists, actions } = testBed;
       expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
 
@@ -130,7 +130,7 @@ describe('<RemoteClusterList />', () => {
   });
 
   describe('confirmation modal (delete remote cluster)', () => {
-    test('should remove the remote cluster from the table after delete is successful', async () => {
+    test('removes the remote cluster from the table after delete is successful', async () => {
       const { actions, getRemoteClustersTableRows, component } = testBed;
       // Mock HTTP DELETE request
       httpRequestsMockHelpers.setDeleteRemoteClusterResponse({
