@@ -27,6 +27,8 @@ export const setup = async (props) => {
     testBed = initTestBed(props);
   });
 
+  testBed.component.update();
+
   const EUI_TABLE = 'remoteClusterListTable';
 
   // User actions
@@ -84,10 +86,26 @@ export const setup = async (props) => {
     find('remoteClusterListTable.pagination-button-next').simulate('click');
   };
 
-  testBed.component.update();
+  const isDetailPanelVisible = () => {
+    const { exists } = testBed;
+    return exists('remoteClusterDetailFlyout');
+  };
+
+  const getDetailPanelTitle = () => {
+    const { find } = testBed;
+    return find('remoteClusterDetailsFlyoutTitle').text();
+  };
+
+  const getDetailPanelStatusHeading = () => {
+    const { find } = testBed;
+    return find('remoteClusterDetailPanelStatusSection').find('h3').text();
+  };
 
   return {
     ...testBed,
+    isDetailPanelVisible,
+    getDetailPanelTitle,
+    getDetailPanelStatusHeading,
     actions: {
       selectRemoteClusterAt,
       clickBulkDeleteButton,

@@ -72,29 +72,27 @@ describe('<RemoteClusterList /> detail panel', () => {
     testBed = await setup();
   });
 
-  test('should open a detail panel when clicking on a remote cluster', () => {
-    const { exists, actions } = testBed;
-    expect(exists('remoteClusterDetailFlyout')).toBe(false);
-
+  test('opens a detail panel when clicking on a remote cluster', () => {
+    const { isDetailPanelVisible, actions } = testBed;
+    expect(isDetailPanelVisible()).toBe(false);
     actions.clickRemoteClusterAt(0);
-
-    expect(exists('remoteClusterDetailFlyout')).toBe(true);
+    expect(isDetailPanelVisible()).toBe(true);
   });
 
-  test('should set the title to the remote cluster selected', () => {
-    const { find, actions } = testBed;
+  test('sets the title to the remote cluster selected', () => {
+    const { getDetailPanelTitle, actions } = testBed;
     actions.clickRemoteClusterAt(0); // Select remote cluster and open the detail panel
-    expect(find('remoteClusterDetailsFlyoutTitle').text()).toEqual('remoteCluster1');
+    expect(getDetailPanelTitle()).toEqual('remoteCluster1');
   });
 
-  test('should have a "Status" section', () => {
-    const { find, exists, actions } = testBed;
+  test('has a "Status" section', () => {
+    const { getDetailPanelStatusHeading, exists, actions } = testBed;
     actions.clickRemoteClusterAt(0);
-    expect(find('remoteClusterDetailPanelStatusSection').find('h3').text()).toEqual('Status');
+    expect(getDetailPanelStatusHeading()).toEqual('Status');
     expect(exists('remoteClusterDetailPanelStatusValues')).toBe(true);
   });
 
-  test('should set the correct remote cluster status values', () => {
+  test('sets the correct remote cluster status values', () => {
     const { find, actions } = testBed;
     actions.clickRemoteClusterAt(0);
 
@@ -106,7 +104,7 @@ describe('<RemoteClusterList /> detail panel', () => {
     expect(find('remoteClusterDetailInitialConnectTimeout').text()).toEqual('30s');
   });
 
-  test('should have a "close", "delete" and "edit" button in the footer', () => {
+  test('has a "close", "delete" and "edit" button in the footer', () => {
     const { exists, actions } = testBed;
     actions.clickRemoteClusterAt(0);
     expect(exists('remoteClusterDetailsPanelCloseButton')).toBe(true);
@@ -114,17 +112,17 @@ describe('<RemoteClusterList /> detail panel', () => {
     expect(exists('remoteClusterDetailPanelEditButton')).toBe(true);
   });
 
-  test('should close the detail panel when clicking the "close" button', () => {
-    const { find, exists, actions } = testBed;
+  test('closes the detail panel when clicking the "close" button', () => {
+    const { find, isDetailPanelVisible, actions } = testBed;
     actions.clickRemoteClusterAt(0); // open the detail panel
-    expect(exists('remoteClusterDetailFlyout')).toBe(true);
+    expect(isDetailPanelVisible()).toBe(true);
 
     find('remoteClusterDetailsPanelCloseButton').simulate('click');
 
-    expect(exists('remoteClusterDetailFlyout')).toBe(false);
+    expect(isDetailPanelVisible()).toBe(false);
   });
 
-  test('should open a confirmation modal when clicking the "delete" button', () => {
+  test('opens a confirmation modal when clicking the "delete" button', () => {
     const { find, exists, actions } = testBed;
     actions.clickRemoteClusterAt(0);
     expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
@@ -134,18 +132,18 @@ describe('<RemoteClusterList /> detail panel', () => {
     expect(exists('remoteClustersDeleteConfirmModal')).toBe(true);
   });
 
-  test('should display a "Remote cluster not found" when providing a wrong cluster name', async () => {
-    const { exists, component } = testBed;
-    expect(exists('remoteClusterDetailFlyout')).toBe(false);
+  test('displays a "Remote cluster not found" when providing a wrong cluster name', async () => {
+    const { exists, isDetailPanelVisible, component } = testBed;
+    expect(isDetailPanelVisible()).toBe(false);
 
     getRouter().history.replace({ search: `?cluster=wrong-cluster` });
     component.update();
 
-    expect(exists('remoteClusterDetailFlyout')).toBe(true);
+    expect(isDetailPanelVisible()).toBe(true);
     expect(exists('remoteClusterDetailClusterNotFound')).toBe(true);
   });
 
-  test('should display a warning when the cluster is configured by node', () => {
+  test('displays a warning when the cluster is configured by node', () => {
     const { exists, actions } = testBed;
     actions.clickRemoteClusterAt(0); // the remoteCluster1 has *not* been configured by node
     expect(exists('remoteClusterConfiguredByNodeWarning')).toBe(false);
